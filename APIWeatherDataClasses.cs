@@ -1,7 +1,7 @@
-namespace WeatherDataClasses
+namespace APIWeatherDataClasses
 
 {
-    public class WeatherData
+    public class APIWeatherData
     {
         public string type { get; set; }
         public Geometry geometry { get; set; }

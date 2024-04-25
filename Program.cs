@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using WeatherDataClasses;
+using APIWeatherDataClasses;
 using CoordinatesDataClasses;
 using System.Transactions;
 using UserWeatherDataClasses;
@@ -17,6 +17,7 @@ class Program
     static CoordinatesDataClass coordinatesDataClass = new CoordinatesDataClass();
     public static async Task Main()
     {
+        Directory.CreateDirectory("weatherdatalogs");
         double latitude;
         double longitude;
 
@@ -52,8 +53,8 @@ class Program
         try
         {
             string responseBody = await FetchWeatherData(url);
-            File.WriteAllText("weatherAPIdata.json", responseBody);
-            WeatherData weatherJsonData = JsonSerializer.Deserialize<WeatherData>(responseBody);
+            File.WriteAllText("weatherdatalogs/apiweatherdata.json", responseBody);
+            APIWeatherData weatherJsonData = JsonSerializer.Deserialize<APIWeatherData>(responseBody);
             Program.PrintWeatherData(weatherJsonData, countryChoice, cityChoice);
         }
         catch (HttpRequestException e)
@@ -68,7 +69,9 @@ class Program
         string userResponse = Console.ReadLine();
         if (userResponse == "y")
         {
-            Console.WriteLine("Enter the time (hours:minutes): ");
+            Console.WriteLine("Enter the date year-month-day:");
+            string date = Console.ReadLine();
+            Console.WriteLine("Enter the time hour:minute:second:");
             string time = Console.ReadLine();
             Console.WriteLine("Enter the temperature (°C): ");
             double temperature = double.Parse(Console.ReadLine());
@@ -83,7 +86,7 @@ class Program
 
             UserWeatherDetails userWeatherDetails = new UserWeatherDetails
             {
-                Time = time,
+                DateTime = $"Date: {date} Time: {time}",
                 AirTemperature = temperature,
                 CloudAreaFraction = cloudAreaFraction,
                 PrecipitationAmount = precipitationAmount,
@@ -93,8 +96,7 @@ class Program
             Console.WriteLine("Do you want to save the data to a file? (y/n)");
             if (Console.ReadLine() == "y")
             {
-                string json = JsonSerializer.Serialize(userWeatherDetails);
-                File.WriteAllText("userWeatherData.json", json);
+                UserWeatherDetails.SaveUserWeatherData(userWeatherDetails);
             }
         }
     }
@@ -106,7 +108,7 @@ class Program
         return await response.Content.ReadAsStringAsync();
     }
 
-    public static void PrintWeatherData(WeatherData weatherJsonData, int countryChoice, int cityChoice)
+    public static void PrintWeatherData(APIWeatherData weatherJsonData, int countryChoice, int cityChoice)
     {
         Console.WriteLine("Weather in: " + coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].cities[cityChoice - 1].city + ", " + coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].country);
         Console.WriteLine("Last updated: " + weatherJsonData.properties.meta.updated_at);
