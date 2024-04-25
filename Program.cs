@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text.Json;
+using System.IO;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
+using WeatherDataClasses;
 
-public class WeatherData
-{
-    public int air_temperature { get; set; }
-    public double cloud_area_fraction { get; set; }
-    public double relative_humidity { get; set; }
-    public string wind_from_direction { get; set; }
-    public double wind_speed { get; set; }
-}
+
+
 
 class Program
 {
@@ -24,14 +19,25 @@ class Program
         try
         {
             string responseBody = await FetchWeatherData(url);
-            Console.WriteLine(responseBody);
             File.WriteAllText("weatherdata.json", responseBody);
+            WeatherData weatherJsonData = JsonSerializer.Deserialize<WeatherData>(responseBody);
+
+            Console.WriteLine("Weather data for Grimstad");
+            Console.WriteLine("Last updated: " + weatherJsonData.properties.meta.updated_at);
+            Console.WriteLine("Temperature: " + weatherJsonData.properties.timeseries[0].data.instant.details.air_temperature + "°C");
+            Console.WriteLine("Cloud area fraction: " + weatherJsonData.properties.timeseries[0].data.instant.details.cloud_area_fraction + "%");
+            Console.WriteLine("Relative humidity: " + weatherJsonData.properties.timeseries[0].data.instant.details.relative_humidity + "%");
+            Console.WriteLine("Wind speed: " + weatherJsonData.properties.timeseries[0].data.instant.details.wind_speed + "m/s");
+
+
         }
         catch (HttpRequestException e)
         {
             Console.WriteLine("\nException Caught!");
             Console.WriteLine("Message :{0} ", e.Message);
         }
+
+
     }
     public static async Task<string> FetchWeatherData(string url)
     {
@@ -41,3 +47,4 @@ class Program
         return await response.Content.ReadAsStringAsync();
     }
 }
+
