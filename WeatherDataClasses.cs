@@ -73,5 +73,6 @@ namespace WeatherDataClasses
         public double cloud_area_fraction { get; set; }
         public double relative_humidity { get; set; }
         public double wind_speed { get; set; }
+        public double precipitation_amount { get; set; }
     }
 }
