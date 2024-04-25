@@ -5,6 +5,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using WeatherDataClasses;
 using CoordinatesDataClasses;
+using System.Transactions;
+using UserWeatherDataClasses;
 
 
 
@@ -50,20 +52,50 @@ class Program
         try
         {
             string responseBody = await FetchWeatherData(url);
-            File.WriteAllText("weatherdata.json", responseBody);
+            File.WriteAllText("weatherAPIdata.json", responseBody);
             WeatherData weatherJsonData = JsonSerializer.Deserialize<WeatherData>(responseBody);
-            Console.WriteLine("Weather in: " + coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].cities[cityChoice - 1].city + ", " + coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].country);
-            Console.WriteLine("Last updated: " + weatherJsonData.properties.meta.updated_at);
-            Console.WriteLine("Temperature: " + weatherJsonData.properties.timeseries[0].data.instant.details.air_temperature + "°C");
-            Console.WriteLine("Cloud area fraction: " + weatherJsonData.properties.timeseries[0].data.instant.details.cloud_area_fraction + "%");
-            Console.WriteLine("Relative humidity: " + weatherJsonData.properties.timeseries[0].data.instant.details.relative_humidity + "%");
-            Console.WriteLine("Wind speed: " + weatherJsonData.properties.timeseries[0].data.instant.details.wind_speed + "m/s");
-            Console.WriteLine("Precipitation amount next hour: " + weatherJsonData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount + "mm");
+            Program.PrintWeatherData(weatherJsonData, countryChoice, cityChoice);
         }
         catch (HttpRequestException e)
         {
             Console.WriteLine("\nException Caught!");
             Console.WriteLine("Message :{0} ", e.Message);
+        }
+
+        // Fetch Data from the user
+
+        Console.WriteLine("Do you have any data to share? (y/n)");
+        string userResponse = Console.ReadLine();
+        if (userResponse == "y")
+        {
+            Console.WriteLine("Enter the time (hours:minutes): ");
+            string time = Console.ReadLine();
+            Console.WriteLine("Enter the temperature (°C): ");
+            double temperature = double.Parse(Console.ReadLine());
+            Console.WriteLine("Enter the cloud area fraction (%): ");
+            double cloudAreaFraction = double.Parse(Console.ReadLine());
+            Console.WriteLine("Enter the precipitation amount (mm): ");
+            double precipitationAmount = double.Parse(Console.ReadLine());
+            Console.WriteLine("Enter the relative humidity (%): ");
+            double relativeHumidity = double.Parse(Console.ReadLine());
+            Console.WriteLine("Enter the wind speed (m/s): ");
+            double windSpeed = double.Parse(Console.ReadLine());
+
+            UserWeatherDetails userWeatherDetails = new UserWeatherDetails
+            {
+                Time = time,
+                AirTemperature = temperature,
+                CloudAreaFraction = cloudAreaFraction,
+                PrecipitationAmount = precipitationAmount,
+                RelativeHumidity = relativeHumidity,
+                WindSpeed = windSpeed
+            };
+            Console.WriteLine("Do you want to save the data to a file? (y/n)");
+            if (Console.ReadLine() == "y")
+            {
+                string json = JsonSerializer.Serialize(userWeatherDetails);
+                File.WriteAllText("userWeatherData.json", json);
+            }
         }
     }
     public static async Task<string> FetchWeatherData(string url)
@@ -73,5 +105,17 @@ class Program
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync();
     }
+
+    public static void PrintWeatherData(WeatherData weatherJsonData, int countryChoice, int cityChoice)
+    {
+        Console.WriteLine("Weather in: " + coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].cities[cityChoice - 1].city + ", " + coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].country);
+        Console.WriteLine("Last updated: " + weatherJsonData.properties.meta.updated_at);
+        Console.WriteLine("Temperature: " + weatherJsonData.properties.timeseries[0].data.instant.details.air_temperature + "°C");
+        Console.WriteLine("Cloud area fraction: " + weatherJsonData.properties.timeseries[0].data.instant.details.cloud_area_fraction + "%");
+        Console.WriteLine("Relative humidity: " + weatherJsonData.properties.timeseries[0].data.instant.details.relative_humidity + "%");
+        Console.WriteLine("Wind speed: " + weatherJsonData.properties.timeseries[0].data.instant.details.wind_speed + "m/s");
+        Console.WriteLine("Precipitation amount: " + weatherJsonData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount + "mm");
+    }
+
 }
 

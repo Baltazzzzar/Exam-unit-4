@@ -4,3 +4,5 @@ bin/
 .vscode/
 .gitattributes
 weatherdata.json
+weatherAPIdata.json
+userWeatherDetails.json

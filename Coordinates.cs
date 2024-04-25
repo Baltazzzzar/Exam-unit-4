@@ -40,6 +40,7 @@ namespace CoordinatesDataClasses
         country = "Sweden",
         cities = new List<Cities>
         {
+            new Cities { city = "Stockholm", Coordinates = new Coordinates { Latitude = 59.3293, Longitude = 18.0686 } },
             new Cities { city = "Gothenburg", Coordinates = new Coordinates { Latitude = 57.7089, Longitude = 11.9746 } },
             new Cities { city = "Malmö", Coordinates = new Coordinates { Latitude = 55.6049, Longitude = 13.0038 } },
             new Cities { city = "Luleå", Coordinates = new Coordinates { Latitude = 65.5848, Longitude = 22.1567 } }
