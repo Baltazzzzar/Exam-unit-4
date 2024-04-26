@@ -1,3 +1,7 @@
+using System.Security.Authentication;
+using System.Text.Json;
+using Program;
+
 namespace APIWeatherDataClasses
 
 {
@@ -7,6 +11,7 @@ namespace APIWeatherDataClasses
         public Geometry geometry { get; set; }
         public Properties properties { get; set; }
     }
+
 
     public class Geometry
     {
@@ -75,4 +80,6 @@ namespace APIWeatherDataClasses
         public double wind_speed { get; set; }
         public double precipitation_amount { get; set; }
     }
+
+
 }

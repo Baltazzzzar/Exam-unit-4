@@ -8,11 +8,12 @@ namespace UserWeatherDataClasses
 {
     public class UserWeatherDetails
     {
-        public string DateTime { get; set; }
-        public double AirTemperature { get; set; }
+        public string City { get; set; }
+        public string Time { get; set; }
+        public double Temperature { get; set; }
         public double CloudAreaFraction { get; set; }
         public double PrecipitationAmount { get; set; }
-        public double RelativeHumidity { get; set; }
+        public double Humidity { get; set; }
         public double WindSpeed { get; set; }
 
         public static void SaveUserWeatherData(UserWeatherDetails userWeatherLogEntry)
@@ -20,7 +21,7 @@ namespace UserWeatherDataClasses
             try
             {
                 List<UserWeatherDetails> allDetails = new List<UserWeatherDetails>();
-                string filePath = "weatherdatalogs/userweatherdata.json";
+                string filePath = "weatherdatalogs/userweatherdatalog.json";
                 if (File.Exists(filePath) && new FileInfo(filePath).Length > 0)
                 {
                     string json = File.ReadAllText(filePath);
