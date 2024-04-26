@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using APIWeatherDataClasses;
 using CoordinatesDataClasses;
 using System.Transactions;
-using LoggingWeatherDataClasses;
+using LoggingWeatherDataClass;
 using System.Security.Cryptography.X509Certificates;
 
 
@@ -16,6 +16,8 @@ namespace Program
     {
         static HttpClient client = new HttpClient();
         static CoordinatesDataClass coordinatesDataClass = new CoordinatesDataClass();
+        public static string filePathAPIData = "weatherdatalogs/apiweatherdatalog.json";
+        public static string filePathUserData = "weatherdatalogs/userweatherdatalog.json";
 
         public static async Task Main()
         {
@@ -53,12 +55,13 @@ namespace Program
             Console.Clear();
             string url = $"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latitude}&lon={longitude}";
             WeatherDetailsLog aPIWeatherDetails = null;
+            APIWeatherData weatherJsonData = null;
 
             try
             {
                 string responseBody = await FetchWeatherData(url);
                 File.WriteAllText("weatherdatalogs/apirawweatherdata.json", responseBody);
-                APIWeatherData weatherJsonData = JsonSerializer.Deserialize<APIWeatherData>(responseBody);
+                weatherJsonData = JsonSerializer.Deserialize<APIWeatherData>(responseBody);
 
                 Program.PrintWeatherData(weatherJsonData, countryChoice, cityChoice);
 
@@ -72,7 +75,6 @@ namespace Program
                     aPIWeatherDetails.WindSpeed = weatherJsonData.properties.timeseries[0].data.instant.details.wind_speed;
                     aPIWeatherDetails.PrecipitationAmount = weatherJsonData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount;
                 }
-
             }
             catch (HttpRequestException e)
             {
@@ -84,17 +86,21 @@ namespace Program
             string userResponse = Console.ReadLine();
             if (userResponse == "y")
             {
+                Console.Clear();
                 Console.WriteLine("Enter the temperature (°C): ");
                 double temperature = double.Parse(Console.ReadLine());
+                Console.Clear();
                 Console.WriteLine("Enter the cloud area fraction (%): ");
                 double cloudAreaFraction = double.Parse(Console.ReadLine());
+                Console.Clear();
                 Console.WriteLine("Enter the precipitation amount (mm): ");
                 double precipitationAmount = double.Parse(Console.ReadLine());
+                Console.Clear();
                 Console.WriteLine("Enter the relative humidity (%): ");
                 double relativeHumidity = double.Parse(Console.ReadLine());
+                Console.Clear();
                 Console.WriteLine("Enter the wind speed (m/s): ");
                 double windSpeed = double.Parse(Console.ReadLine());
-
                 WeatherDetailsLog userWeatherDetails = new WeatherDetailsLog
                 {
                     City = coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].cities[cityChoice - 1].city,
@@ -105,18 +111,44 @@ namespace Program
                     Humidity = relativeHumidity,
                     WindSpeed = windSpeed
                 };
+                Console.Clear();
                 Console.WriteLine("Do you want to save the data to a file? (y/n)");
                 if (Console.ReadLine() == "y")
                 {
-                    string filepath = "weatherdatalogs/userweatherdatalog.json";
-                    WeatherDetailsLog.SaveWeatherData(userWeatherDetails, filepath);
-                    filepath = "weatherdatalogs/apiweatherdatalog.json";
-                    WeatherDetailsLog.SaveWeatherData(aPIWeatherDetails, filepath);
-
+                    WeatherDetailsLog.SaveWeatherData(userWeatherDetails, Program.filePathUserData);
+                    WeatherDetailsLog.SaveWeatherData(aPIWeatherDetails, Program.filePathAPIData);
                 }
             }
-
-
+            Console.Clear();
+            Console.WriteLine("Do you want to see the log? (y/n)");
+            if (Console.ReadLine() == "y")
+            {
+                Console.Clear();
+                Console.WriteLine("Do you wish to see: ?");
+                Console.WriteLine("1. A day");
+                Console.WriteLine("2. A week");
+                Console.WriteLine("3. A month");
+                int choice = int.Parse(Console.ReadLine());
+                int amountOfLogEntries = 0;
+                if (choice == 1)
+                {
+                    amountOfLogEntries = 1;
+                }
+                else if (choice == 2)
+                {
+                    amountOfLogEntries = 7;
+                }
+                else if (choice == 3)
+                {
+                    amountOfLogEntries = 30;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid choice");
+                    Environment.Exit(0);
+                }
+                WeatherDetailsLog.PrintWeatherDataLog(filePathUserData, filePathAPIData, amountOfLogEntries);
+            }
         }
         public static async Task<string> FetchWeatherData(string url)
         {
@@ -125,7 +157,6 @@ namespace Program
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
-
         public static void PrintWeatherData(APIWeatherData weatherJsonData, int countryChoice, int cityChoice)
         {
             Console.WriteLine("Weather in: " + coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].cities[cityChoice - 1].city + ", " + coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].country);
