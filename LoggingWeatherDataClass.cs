@@ -90,5 +90,32 @@ namespace LoggingWeatherDataClass
                 Console.WriteLine("No logged data available");
             }
         }
+        public static void CompareData(string filePathUserData, string filePathAPIData, int amountOfLogEntries)
+        {
+            string jsonUserData = File.ReadAllText(filePathUserData);
+            string jsonAPIData = File.ReadAllText(filePathAPIData);
+            var userData = JsonSerializer.Deserialize<WeatherDetailsLog[]>(jsonUserData);
+            var apiData = JsonSerializer.Deserialize<WeatherDetailsLog[]>(jsonAPIData);
+
+            for (int i = 0; i < amountOfLogEntries; i++)
+            {
+                if (i < userData.Length && i < apiData.Length)
+                {
+                    Console.WriteLine($"Comparison for data entry {i + 1}:");
+                    Console.WriteLine("Difference in data:");
+                    Console.WriteLine("Temperature: " + Math.Round(userData[i].Temperature - apiData[i].Temperature, 1) + "°C");
+                    Console.WriteLine("Cloud area fraction: " + Math.Round(userData[i].CloudAreaFraction - apiData[i].CloudAreaFraction, 1) + "%");
+                    Console.WriteLine("Relative humidity: " + Math.Round(userData[i].Humidity - apiData[i].Humidity, 1) + "%");
+                    Console.WriteLine("Wind speed: " + Math.Round(userData[i].WindSpeed - apiData[i].WindSpeed, 1) + "m/s");
+                    Console.WriteLine("Precipitation amount: " + Math.Round(userData[i].PrecipitationAmount - apiData[i].PrecipitationAmount, 1) + "mm");
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine($"No more data to compare for entry {i + 1}.");
+                    break;
+                }
+            }
+        }
     }
 }

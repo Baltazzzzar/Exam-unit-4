@@ -16,8 +16,8 @@ namespace Program
     {
         static HttpClient client = new HttpClient();
         static CoordinatesDataClass coordinatesDataClass = new CoordinatesDataClass();
-        public static string filePathAPIData = "weatherdatalogs/apiweatherdatalog.json";
-        public static string filePathUserData = "weatherdatalogs/userweatherdatalog.json";
+        public static string filePathAPIData = "";
+        public static string filePathUserData = "";
 
         public static async Task Main()
         {
@@ -51,6 +51,8 @@ namespace Program
             Coordinates coordinates = coordinatesDataClass.GetCoordinates(countryChoice - 1, cityChoice - 1);
             latitude = coordinates.Latitude;
             longitude = coordinates.Longitude;
+            filePathAPIData = $"weatherdatalogs/{coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].cities[cityChoice - 1].city.ToLower()}_apiweatherlog.json";
+            filePathUserData = $"weatherdatalogs/{coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].cities[cityChoice - 1].city.ToLower()}_userweatherlog.json";
 
             Console.Clear();
             string url = $"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latitude}&lon={longitude}";
@@ -121,15 +123,15 @@ namespace Program
             }
             Console.Clear();
             Console.WriteLine("Do you want to see the log? (y/n)");
+            int amountOfLogEntries = 0;
             if (Console.ReadLine() == "y")
             {
                 Console.Clear();
-                Console.WriteLine("Do you wish to see: ?");
+                Console.WriteLine("Enter the length of the log you want to see: ?");
                 Console.WriteLine("1. A day");
                 Console.WriteLine("2. A week");
                 Console.WriteLine("3. A month");
                 int choice = int.Parse(Console.ReadLine());
-                int amountOfLogEntries = 0;
                 if (choice == 1)
                 {
                     amountOfLogEntries = 1;
@@ -149,6 +151,16 @@ namespace Program
                 }
                 WeatherDetailsLog.PrintWeatherDataLog(filePathUserData, filePathAPIData, amountOfLogEntries);
             }
+            Console.ReadLine();
+            Console.Clear();
+            Console.WriteLine("Do you want to compare that data? (y/n)");
+            if (Console.ReadLine() == "y")
+            {
+                Console.Clear();
+                Console.WriteLine();
+                WeatherDetailsLog.CompareData(filePathUserData, filePathAPIData, amountOfLogEntries);
+            }
+
         }
         public static async Task<string> FetchWeatherData(string url)
         {
