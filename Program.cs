@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using APIWeatherDataClasses;
 using CoordinatesDataClasses;
 using System.Transactions;
-using UserWeatherDataClasses;
+using LoggingWeatherDataClasses;
 using System.Security.Cryptography.X509Certificates;
 
 
@@ -45,17 +45,14 @@ namespace Program
                 Console.WriteLine($"{index}. {cityData.city}");
                 index++;
             }
-
             int cityChoice = int.Parse(Console.ReadLine());
             Coordinates coordinates = coordinatesDataClass.GetCoordinates(countryChoice - 1, cityChoice - 1);
             latitude = coordinates.Latitude;
             longitude = coordinates.Longitude;
+
             Console.Clear();
-
-
             string url = $"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latitude}&lon={longitude}";
-
-            APIWeatherDetails aPIWeatherDetails = null;
+            WeatherDetailsLog aPIWeatherDetails = null;
 
             try
             {
@@ -65,7 +62,7 @@ namespace Program
 
                 Program.PrintWeatherData(weatherJsonData, countryChoice, cityChoice);
 
-                aPIWeatherDetails = new APIWeatherDetails();
+                aPIWeatherDetails = new WeatherDetailsLog();
                 {
                     aPIWeatherDetails.City = coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].cities[cityChoice - 1].city;
                     aPIWeatherDetails.Time = weatherJsonData.properties.meta.updated_at;
@@ -83,8 +80,6 @@ namespace Program
                 Console.WriteLine("Message :{0} ", e.Message);
             }
 
-            // Fetch Data from the user
-
             Console.WriteLine("Do you have any data to share? (y/n)");
             string userResponse = Console.ReadLine();
             if (userResponse == "y")
@@ -100,7 +95,7 @@ namespace Program
                 Console.WriteLine("Enter the wind speed (m/s): ");
                 double windSpeed = double.Parse(Console.ReadLine());
 
-                UserWeatherDetails userWeatherDetails = new UserWeatherDetails
+                WeatherDetailsLog userWeatherDetails = new WeatherDetailsLog
                 {
                     City = coordinatesDataClass.CountryCityCoordinates[countryChoice - 1].cities[cityChoice - 1].city,
                     Time = DateTime.Now.ToString(),
@@ -113,10 +108,15 @@ namespace Program
                 Console.WriteLine("Do you want to save the data to a file? (y/n)");
                 if (Console.ReadLine() == "y")
                 {
-                    UserWeatherDetails.SaveUserWeatherData(userWeatherDetails);
-                    APIWeatherDetails.SaveAPIWeatherData(aPIWeatherDetails);
+                    string filepath = "weatherdatalogs/userweatherdatalog.json";
+                    WeatherDetailsLog.SaveWeatherData(userWeatherDetails, filepath);
+                    filepath = "weatherdatalogs/apiweatherdatalog.json";
+                    WeatherDetailsLog.SaveWeatherData(aPIWeatherDetails, filepath);
+
                 }
             }
+
+
         }
         public static async Task<string> FetchWeatherData(string url)
         {
@@ -136,32 +136,5 @@ namespace Program
             Console.WriteLine("Wind speed: " + weatherJsonData.properties.timeseries[0].data.instant.details.wind_speed + "m/s");
             Console.WriteLine("Precipitation amount: " + weatherJsonData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount + "mm");
         }
-        public class APIWeatherDetails
-        {
-            public string City { get; set; }
-            public string Time { get; set; }
-            public double Temperature { get; set; }
-            public double CloudAreaFraction { get; set; }
-            public double Humidity { get; set; }
-            public double WindSpeed { get; set; }
-            public double PrecipitationAmount { get; set; }
-
-            public static void SaveAPIWeatherData(APIWeatherDetails apiWeatherDetails)
-            {
-                string filePath = "weatherdatalogs/apiweatherdatalog.json";
-                List<APIWeatherDetails> allDetails = new List<APIWeatherDetails>();
-
-                if (File.Exists(filePath) && new FileInfo(filePath).Length > 0)
-                {
-                    string entriesJson = File.ReadAllText(filePath);
-                    allDetails = JsonSerializer.Deserialize<List<APIWeatherDetails>>(entriesJson);
-                }
-
-                allDetails.Add(apiWeatherDetails);
-                string newJsonEntries = JsonSerializer.Serialize(allDetails);
-                File.WriteAllText(filePath, newJsonEntries);
-            }
-        }
-
     }
 }

@@ -4,9 +4,9 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text.Json;
 
-namespace UserWeatherDataClasses
+namespace LoggingWeatherDataClasses
 {
-    public class UserWeatherDetails
+    public class WeatherDetailsLog
     {
         public string City { get; set; }
         public string Time { get; set; }
@@ -16,16 +16,15 @@ namespace UserWeatherDataClasses
         public double Humidity { get; set; }
         public double WindSpeed { get; set; }
 
-        public static void SaveUserWeatherData(UserWeatherDetails userWeatherLogEntry)
+        public static void SaveWeatherData(WeatherDetailsLog userWeatherLogEntry, string filePath)
         {
             try
             {
-                List<UserWeatherDetails> allDetails = new List<UserWeatherDetails>();
-                string filePath = "weatherdatalogs/userweatherdatalog.json";
+                List<WeatherDetailsLog> allDetails = new List<WeatherDetailsLog>();
                 if (File.Exists(filePath) && new FileInfo(filePath).Length > 0)
                 {
                     string json = File.ReadAllText(filePath);
-                    allDetails = JsonSerializer.Deserialize<List<UserWeatherDetails>>(json);
+                    allDetails = JsonSerializer.Deserialize<List<WeatherDetailsLog>>(json);
                 }
                 allDetails.Add(userWeatherLogEntry);
                 string newJsonEntries = JsonSerializer.Serialize(allDetails);
