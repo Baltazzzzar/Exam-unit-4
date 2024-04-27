@@ -1,7 +1,4 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using CoordinatesDataClasses;
-using Program;
 using LoggingWeatherDataClass;
 using Utils;
 using APIWeatherDataClasses;
@@ -11,7 +8,6 @@ using System.Text.Json;
 
 namespace Menu
 {
-    using MenuItem = System.ValueTuple<string, Action>;
     enum TOC_INDEXES : int
     {
         CountryMenu,
@@ -29,18 +25,13 @@ namespace Menu
         int menuChange = 0;
         public static int countryChoice;
         public static int cityChoice;
-        public static int amountOfLogEntries = 0;
         public static double latitude;
         public static double longitude;
         public static string url = "";
-        APIWeatherData aPIWeatherData = null;
-        public static WeatherDataLog userWeatherDetails = null;
-        public static WeatherDataLog aPIWeatherDetails = null;
         public static string filePathAPIData = "";
         public static string filePathUserData = "";
         static readonly HttpClient client = new HttpClient();
         static CoordinatesDataClass coordinatesDataClass = new CoordinatesDataClass();
-        Output output = new Output();
         public MenuScreen()
         {
             currentMenu = GetMenuForMenuIndex(currentTOC);
@@ -79,21 +70,23 @@ namespace Menu
                             Output.Write(Output.Reset(""));
                             Console.ReadLine();
                         }
-                        aPIWeatherData = JsonSerializer.Deserialize<APIWeatherData>(responseBody);
-                        aPIWeatherDetails = new WeatherDataLog();
+                        APIWeatherData.aPIWeatherData = JsonSerializer.Deserialize<APIWeatherData>(responseBody);
+                        WeatherDataLog.aPIWeatherDetails = new WeatherDataLog();
                         {
-                            aPIWeatherDetails.City = coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city;
-                            aPIWeatherDetails.Time = aPIWeatherData.properties.meta.updated_at;
-                            aPIWeatherDetails.Temperature = aPIWeatherData.properties.timeseries[0].data.instant.details.air_temperature;
-                            aPIWeatherDetails.CloudAreaFraction = aPIWeatherData.properties.timeseries[0].data.instant.details.cloud_area_fraction;
-                            aPIWeatherDetails.Humidity = aPIWeatherData.properties.timeseries[0].data.instant.details.relative_humidity;
-                            aPIWeatherDetails.WindSpeed = aPIWeatherData.properties.timeseries[0].data.instant.details.wind_speed;
-                            aPIWeatherDetails.PrecipitationAmount = aPIWeatherData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount;
+                            WeatherDataLog.aPIWeatherDetails.City = coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city;
+                            WeatherDataLog.aPIWeatherDetails.Time = APIWeatherData.aPIWeatherData.properties.meta.updated_at;
+                            WeatherDataLog.aPIWeatherDetails.Temperature = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.instant.details.air_temperature;
+                            WeatherDataLog.aPIWeatherDetails.CloudAreaFraction = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.instant.details.cloud_area_fraction;
+                            WeatherDataLog.aPIWeatherDetails.Humidity = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.instant.details.relative_humidity;
+                            WeatherDataLog.aPIWeatherDetails.WindSpeed = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.instant.details.wind_speed;
+                            WeatherDataLog.aPIWeatherDetails.PrecipitationAmount = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount;
                         }
 
                         SwapMenu(TOC_INDEXES.FunctionMenu);
                     });
                 }
+                itemsDescriptionList.Add("Back");
+                itemsActionList.Add(() => { SwapMenu(TOC_INDEXES.CountryMenu); });
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
@@ -107,8 +100,10 @@ namespace Menu
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ WeatherDataLog.PrintWeatherData(aPIWeatherData, countryChoice, cityChoice); },
-                        ()=>{ userWeatherDetails = WeatherDataLog.GetUserWeatherData(coordinatesDataClass, countryChoice, cityChoice); WeatherDataLog.SaveWeatherData(userWeatherDetails, filePathUserData);WeatherDataLog.SaveWeatherData(aPIWeatherDetails, filePathAPIData);},
+                        ()=>{ WeatherDataLog.PrintWeatherReport(APIWeatherData.aPIWeatherData, countryChoice, cityChoice); },
+                        ()=>{ WeatherDataLog.userWeatherDetails = WeatherDataLog.GetUserWeatherData(coordinatesDataClass, countryChoice, cityChoice);
+                            WeatherDataLog.SaveWeatherData(WeatherDataLog.userWeatherDetails, filePathUserData);
+                            WeatherDataLog.SaveWeatherData(WeatherDataLog.aPIWeatherDetails, filePathAPIData);},
                         ()=>{ SwapMenu(TOC_INDEXES.ViewLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.CompareLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.CityMenu); },
@@ -136,9 +131,9 @@ namespace Menu
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 1); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 7); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 30); SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.comparisonData = WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 1); WeatherDataLog.PrintComparisonData(WeatherDataLog.comparisonData) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.comparisonData = WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 7); WeatherDataLog.PrintComparisonData(WeatherDataLog.comparisonData) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.comparisonData = WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 30); WeatherDataLog.PrintComparisonData(WeatherDataLog.comparisonData) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
                         ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
                     }
                 };
@@ -157,6 +152,13 @@ namespace Menu
                         SwapMenu(TOC_INDEXES.CityMenu);
                     });
                 }
+                itemsDescriptionList.Add("Exit");
+                itemsActionList.Add(() =>
+                {
+                    Console.Clear();
+                    Output.WriteInGreen(Output.Reset("Goodbye!"));
+                    Environment.Exit(0);
+                });
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
@@ -165,37 +167,45 @@ namespace Menu
             }
             return output;
         }
-
         void SwapMenu(TOC_INDEXES newMenuIndex)
         {
-            if (!Enum.IsDefined(typeof(TOC_INDEXES), newMenuIndex))
-            {
-                return;
-            }
             currentMenu = GetMenuForMenuIndex(newMenuIndex);
             selectedItemInMenu = 0;
         }
 
         void OnMenuAction(int item)
         {
-            if (item < 0 || item >= currentMenu.itemsAction.Count)
+            if (item < currentMenu.Length)
             {
-                return;
+                currentMenu[item].action();
             }
-            currentMenu.itemsAction[item]();
         }
-        public void input()
+        public void Input()
         {
             if (Console.KeyAvailable)
             {
                 ConsoleKey keyCode = Console.ReadKey(true).Key;
                 if (keyCode == ConsoleKey.DownArrow)
                 {
-                    menuChange = 1;
+                    if (selectedItemInMenu < currentMenu.Length - 1)
+                    {
+                        menuChange = 1;
+                    }
+                    else
+                    {
+                        menuChange = -selectedItemInMenu;
+                    }
                 }
                 else if (keyCode == ConsoleKey.UpArrow)
                 {
-                    menuChange = -1;
+                    if (selectedItemInMenu > 0)
+                    {
+                        menuChange = -1;
+                    }
+                    else
+                    {
+                        menuChange = currentMenu.Length - 1;
+                    }
                 }
                 else if (keyCode == ConsoleKey.Enter)
                 {
@@ -203,13 +213,13 @@ namespace Menu
                 }
             }
         }
-        public void update()
+        public void Update()
         {
             selectedItemInMenu += menuChange;
             selectedItemInMenu = Math.Clamp(selectedItemInMenu, 0, currentMenu.Length - 1);
             menuChange = 0;
         }
-        public void draw()
+        public void Draw()
         {
             Console.CursorVisible = false;
             Console.Clear();
@@ -219,25 +229,23 @@ namespace Menu
             {
                 if (index == selectedItemInMenu)
                 {
-                    printActiveMenuItem($"* {currentMenu[index].description} *");
+                    PrintActiveMenuItem($"-> {currentMenu[index].description}");
                 }
                 else
                 {
-                    printMenuItem($"  {currentMenu[index].description}  ");
+                    PrintMenuItem($"   {currentMenu[index].description}");
                 }
             }
         }
-        void printActiveMenuItem(string item)
+        static void PrintActiveMenuItem(string item)
         {
-            Output.Write(Output.Reset(Output.Bold(Output.Align(Output.Color(item, ANSICodes.Colors.Green), Alignment.LEFT))), newLine: true);
+            Output.WriteInGreen(Output.Reset(Output.Bold(Output.Align(item, Alignment.LEFT))), newLine: true);
         }
-        void printMenuItem(string item)
+        static void PrintMenuItem(string item)
         {
             Output.Write(Output.Reset(Output.Align(item, Alignment.LEFT)), newLine: true);
         }
-
     }
-
     class Menu
     {
 

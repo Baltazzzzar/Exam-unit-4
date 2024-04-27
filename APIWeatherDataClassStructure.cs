@@ -1,75 +1,73 @@
-using System.Security.Authentication;
-using System.Text.Json;
-using Program;
 
 namespace APIWeatherDataClasses
 
 {
     public class APIWeatherData
     {
-        public string type { get; set; }
-        public Geometry geometry { get; set; }
-        public Properties properties { get; set; }
+        public string? type { get; set; }
+        public Geometry? geometry { get; set; }
+        public Properties? properties { get; set; }
+        public static APIWeatherData? aPIWeatherData = null;
     }
 
 
     public class Geometry
     {
-        public string type { get; set; }
-        public List<double> coordinates { get; set; }
+        public string? type { get; set; }
+        public List<double>? coordinates { get; set; }
     }
 
     public class Properties
     {
-        public Meta meta { get; set; }
-        public List<Timeseries> timeseries { get; set; }
+        public Meta? meta { get; set; }
+        public List<Timeseries>? timeseries { get; set; }
     }
     public class Meta
     {
-        public string updated_at { get; set; }
-        public Units units { get; set; }
+        public string? updated_at { get; set; }
+        public Units? units { get; set; }
     }
 
     public class Units
     {
-        public string air_pressure_at_sea_level { get; set; }
-        public string air_temperature { get; set; }
-        public string cloud_area_fraction { get; set; }
-        public string precipitation_amount { get; set; }
-        public string relative_humidity { get; set; }
-        public string wind_from_direction { get; set; }
-        public string wind_speed { get; set; }
+        public string? air_pressure_at_sea_level { get; set; }
+        public string? air_temperature { get; set; }
+        public string? cloud_area_fraction { get; set; }
+        public string? precipitation_amount { get; set; }
+        public string? relative_humidity { get; set; }
+        public string? wind_from_direction { get; set; }
+        public string? wind_speed { get; set; }
     }
 
 
     public class Timeseries
     {
-        public string time { get; set; }
-        public Data data { get; set; }
+        public string? time { get; set; }
+        public Data? data { get; set; }
     }
 
     public class Data
     {
-        public Instant instant { get; set; }
-        public NextHours next_12_hours { get; set; }
-        public NextHours next_1_hours { get; set; }
-        public NextHours next_6_hours { get; set; }
+        public Instant? instant { get; set; }
+        public NextHours? next_12_hours { get; set; }
+        public NextHours? next_1_hours { get; set; }
+        public NextHours? next_6_hours { get; set; }
     }
 
     public class Instant
     {
-        public Details details { get; set; }
+        public Details? details { get; set; }
     }
 
     public class NextHours
     {
-        public Summary summary { get; set; }
-        public Details details { get; set; }
+        public Summary? summary { get; set; }
+        public Details? details { get; set; }
     }
 
     public class Summary
     {
-        public string symbol_code { get; set; }
+        public string? symbol_code { get; set; }
     }
 
     public class Details

@@ -1,5 +1,5 @@
+using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
-using static System.Console;
 
 
 namespace Utils
@@ -36,6 +36,22 @@ namespace Utils
                 Console.Write(text);
             }
             return text;
+        }
+        public static string WriteInRed(string text, bool newLine = false)
+        {
+            return Write(Color(text, ANSICodes.Colors.Red), newLine);
+        }
+        public static string WriteInGreen(string text, bool newLine = false)
+        {
+            return Write(Color(text, ANSICodes.Colors.Green), newLine);
+        }
+        public static string WriteInYellow(string text, bool newLine = false)
+        {
+            return Write(Color(text, ANSICodes.Colors.Yellow), newLine);
+        }
+        public static string WriteInGray(string text, bool newLine = false)
+        {
+            return Write(Color(text, ANSICodes.Colors.Gray), newLine);
         }
         public static string Align(string text, Alignment alignment = Alignment.LEFT, bool newLine = false)
         {

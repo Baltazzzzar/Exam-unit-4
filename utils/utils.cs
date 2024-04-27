@@ -17,6 +17,7 @@ namespace Utils
             public const string Magenta = "\u001b[35m";
             public const string Cyan = "\u001b[36m";
             public const string White = "\u001b[37m";
+            public const string Gray = "\u001b[90m";
         }
 
         public static class BgColors
