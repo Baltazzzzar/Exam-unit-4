@@ -74,13 +74,13 @@ namespace WeatherDataLogging
             var apiData = JsonSerializer.Deserialize<WeatherDataLog[]>(jsonAPIData);
 
 
-            var comparisonData = new WeatherDataLog[amountOfLogEntries];
+            var comparisonData = new List<WeatherDataLog>();
             for (int i = 0; i < amountOfLogEntries; i++)
             {
                 if (i < userData?.Length && i < apiData?.Length)
                 {
                     string convertedAPITime = ConvertTimeFormat(apiData[i].Time);
-                    comparisonData[i] = new WeatherDataLog
+                    comparisonData.Add(new WeatherDataLog
                     {
                         City = userData[i].City,
                         Time = $"User: {userData[i].Time}  | API: {convertedAPITime}",
@@ -89,14 +89,14 @@ namespace WeatherDataLogging
                         Humidity = Math.Round(userData[i].Humidity - apiData[i].Humidity, 1),
                         WindSpeed = Math.Round(userData[i].WindSpeed - apiData[i].WindSpeed, 1),
                         PrecipitationAmount = Math.Round(userData[i].PrecipitationAmount - apiData[i].PrecipitationAmount, 1)
-                    };
+                    });
                 }
                 else
                 {
                     break;
                 }
             }
-            return comparisonData;
+            return comparisonData.ToArray();
         }
         public static WeatherDataLog CalculateAverageDeviation(string filePathUserData, string filePathAPIData, int amountOfLogEntries)
         {
@@ -113,7 +113,6 @@ namespace WeatherDataLogging
             double totalHumidityDeviation = 0;
             double totalWindSpeedDeviation = 0;
             double totalPrecipitationAmountDeviation = 0;
-            int count = 0;
             for (int i = 0; i < amountOfLogEntries; i++)
             {
                 if (i < userData?.Length && i < apiData?.Length)
@@ -123,26 +122,24 @@ namespace WeatherDataLogging
                     totalHumidityDeviation += Math.Abs(userData[i].Humidity - apiData[i].Humidity);
                     totalWindSpeedDeviation += Math.Abs(userData[i].WindSpeed - apiData[i].WindSpeed);
                     totalPrecipitationAmountDeviation += Math.Abs(userData[i].PrecipitationAmount - apiData[i].PrecipitationAmount);
-                    count++;
                 }
                 else
                 {
                     break;
                 }
             }
-            if (count == 0)
+            if (amountOfLogEntries == 0)
             {
                 return null;
             }
-            var averageDeviation = new WeatherDataLog
+            return new WeatherDataLog
             {
-                Temperature = Math.Round(totalTemperatureDeviation / count, 1),
-                CloudAreaFraction = Math.Round(totalCloudAreaFractionDeviation / count, 1),
-                Humidity = Math.Round(totalHumidityDeviation / count, 1),
-                WindSpeed = Math.Round(totalWindSpeedDeviation / count, 1),
-                PrecipitationAmount = Math.Round(totalPrecipitationAmountDeviation / count, 1)
+                Temperature = Math.Round(totalTemperatureDeviation / amountOfLogEntries, 2),
+                CloudAreaFraction = Math.Round(totalCloudAreaFractionDeviation / amountOfLogEntries, 2),
+                Humidity = Math.Round(totalHumidityDeviation / amountOfLogEntries, 2),
+                WindSpeed = Math.Round(totalWindSpeedDeviation / amountOfLogEntries, 2),
+                PrecipitationAmount = Math.Round(totalPrecipitationAmountDeviation / amountOfLogEntries, 2)
             };
-            return averageDeviation;
         }
         public static string ConvertTimeFormat(string inputTime)
         {

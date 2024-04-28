@@ -71,7 +71,7 @@ namespace Menu
             }
             else if (TOC_INDEXES.FunctionMenu == menuIndex)
             {
-                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "Print Weather Log Entries", "Compare Weather Log Data", "See Deviation Of API", "Back", "Exit" };
+                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "Print Weather Log Entries", "Compare Weather Log Data", "See Average Deviation (Accuracy) Of API", "Back", "Exit" };
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
