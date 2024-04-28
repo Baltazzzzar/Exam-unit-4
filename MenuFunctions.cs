@@ -81,7 +81,6 @@ namespace Menu
                             WeatherDataLog.aPIWeatherDetails.WindSpeed = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.instant.details.wind_speed;
                             WeatherDataLog.aPIWeatherDetails.PrecipitationAmount = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount;
                         }
-
                         SwapMenu(TOC_INDEXES.FunctionMenu);
                     });
                 }
@@ -95,7 +94,7 @@ namespace Menu
             }
             else if (TOC_INDEXES.FunctionMenu == menuIndex)
             {
-                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "Print Weather Log Entries", "Compare Weather Log Data", "Back" };
+                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "Print Weather Log Entries", "Compare Weather Log Data", "Back", "Exit" };
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
@@ -107,6 +106,7 @@ namespace Menu
                         ()=>{ SwapMenu(TOC_INDEXES.ViewLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.CompareLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.CityMenu); },
+                        ()=>{ Console.Clear(); Output.WriteInGreen(Output.Reset("Goodbye!")); Environment.Exit(0);}
                     }
                 };
             }
@@ -131,9 +131,9 @@ namespace Menu
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ WeatherDataLog.comparisonData = WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 1); WeatherDataLog.PrintComparisonData(WeatherDataLog.comparisonData) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.comparisonData = WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 7); WeatherDataLog.PrintComparisonData(WeatherDataLog.comparisonData) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.comparisonData = WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 30); WeatherDataLog.PrintComparisonData(WeatherDataLog.comparisonData) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.comparisonData = WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 1); WeatherDataLog.PrintComparisonData(WeatherDataLog.comparisonData, countryChoice, cityChoice) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.comparisonData = WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 7); WeatherDataLog.PrintComparisonData(WeatherDataLog.comparisonData, countryChoice, cityChoice) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.comparisonData = WeatherDataLog.CompareData(filePathUserData, filePathAPIData, 30); WeatherDataLog.PrintComparisonData(WeatherDataLog.comparisonData, countryChoice, cityChoice) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
                         ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
                     }
                 };
@@ -245,6 +245,7 @@ namespace Menu
         {
             Output.Write(Output.Reset(Output.Align(item, Alignment.LEFT)), newLine: true);
         }
+
     }
     class Menu
     {

@@ -2,12 +2,14 @@ using System.Text.Json;
 using CoordinatesDataClasses;
 using APIWeatherDataClasses;
 using Utils;
+using System.Diagnostics.Contracts;
 
 namespace LoggingWeatherDataClass
 {
     public class WeatherDataLog
     {
         public string? City { get; set; }
+        public string? UnParsedTime { get; set; }
         public string? Time { get; set; }
         public double Temperature { get; set; }
         public double CloudAreaFraction { get; set; }
@@ -20,7 +22,7 @@ namespace LoggingWeatherDataClass
         public static WeatherDataLog[]? comparisonData = null;
         static readonly HttpClient client = new HttpClient();
 
-        public static void SaveWeatherData(WeatherDataLog userWeatherLogEntry, string filePath)
+        public static void SaveWeatherData(WeatherDataLog weatherLogEntry, string filePath)
         {
             List<WeatherDataLog>? allDetails = new List<WeatherDataLog>();
             if (File.Exists(filePath) && new FileInfo(filePath).Length > 0)
@@ -28,7 +30,7 @@ namespace LoggingWeatherDataClass
                 string json = File.ReadAllText(filePath);
                 allDetails = JsonSerializer.Deserialize<List<WeatherDataLog>>(json);
             }
-            allDetails?.Add(userWeatherLogEntry);
+            allDetails?.Add(weatherLogEntry);
             string newJsonEntries = JsonSerializer.Serialize(allDetails);
             File.WriteAllText(filePath, newJsonEntries);
         }
@@ -43,19 +45,13 @@ namespace LoggingWeatherDataClass
                 var apiData = JsonSerializer.Deserialize<WeatherDataLog[]>(jsonAPIData);
                 int userCount = 0;
                 int apiCount = 0;
+                Console.WriteLine();
                 for (int i = 0; i < amountOfLogEntries; i++)
                 {
                     if (userCount < userData?.Length)
                     {
-                        Console.WriteLine($"User data entry {i + 1}:");
-                        Console.WriteLine($"City: {userData[userData.Length - 1 - userCount].City}");
-                        Console.WriteLine($"Time: {userData[userData.Length - 1 - userCount].Time}");
-                        Console.WriteLine($"Temperature: {userData[userData.Length - 1 - userCount].Temperature}°C");
-                        Console.WriteLine($"Cloud area fraction: {userData[userData.Length - 1 - userCount].CloudAreaFraction}%");
-                        Console.WriteLine($"Precipitation amount: {userData[userData.Length - 1 - userCount].PrecipitationAmount}mm");
-                        Console.WriteLine($"Relative humidity: {userData[userData.Length - 1 - userCount].Humidity}%");
-                        Console.WriteLine($"Wind speed: {userData[userData.Length - 1 - userCount].WindSpeed}m/s");
-                        Console.WriteLine();
+                        Output.WriteInYellow(Output.Reset($"User data entry {i + 1}:"));
+                        PrintWeatherData(null, userData[userData.Length - 1 - userCount]);
                         userCount++;
                     }
                     else
@@ -65,15 +61,8 @@ namespace LoggingWeatherDataClass
                     }
                     if (apiCount < apiData?.Length)
                     {
-                        Console.WriteLine($"API data entry {i + 1}:");
-                        Console.WriteLine($"City: {apiData[apiData.Length - 1 - apiCount].City}");
-                        Console.WriteLine($"Time: {apiData[apiData.Length - 1 - apiCount].Time}");
-                        Console.WriteLine($"Temperature: {apiData[apiData.Length - 1 - apiCount].Temperature}°C");
-                        Console.WriteLine($"Cloud area fraction: {apiData[apiData.Length - 1 - apiCount].CloudAreaFraction}%");
-                        Console.WriteLine($"Precipitation amount: {apiData[apiData.Length - 1 - apiCount].PrecipitationAmount}mm");
-                        Console.WriteLine($"Relative humidity: {apiData[apiData.Length - 1 - apiCount].Humidity}%");
-                        Console.WriteLine($"Wind speed: {apiData[apiData.Length - 1 - apiCount].WindSpeed}m/s");
-                        Console.WriteLine();
+                        Output.WriteInYellow(Output.Reset($"API data entry {i + 1}:"));
+                        PrintWeatherData(null, apiData[apiData.Length - 1 - apiCount]);
                         apiCount++;
                     }
                     else
@@ -88,6 +77,7 @@ namespace LoggingWeatherDataClass
             }
             Output.WriteInGreen(Output.Reset("Press any key to return"));
             Console.ReadLine();
+            Console.Clear();
         }
         public static WeatherDataLog[] CompareData(string filePathUserData, string filePathAPIData, int amountOfLogEntries)
         {
@@ -100,13 +90,17 @@ namespace LoggingWeatherDataClass
             var userData = JsonSerializer.Deserialize<WeatherDataLog[]>(jsonUserData);
             var apiData = JsonSerializer.Deserialize<WeatherDataLog[]>(jsonAPIData);
 
+
             var comparisonData = new WeatherDataLog[amountOfLogEntries];
             for (int i = 0; i < amountOfLogEntries; i++)
             {
                 if (i < userData?.Length && i < apiData?.Length)
                 {
+                    string convertedAPITime = ConvertTimeFormat(apiData[i].Time);
                     comparisonData[i] = new WeatherDataLog
                     {
+                        City = userData[i].City,
+                        Time = $"User: {userData[i].Time}  | API: {convertedAPITime}",
                         Temperature = Math.Round(userData[i].Temperature - apiData[i].Temperature, 1),
                         CloudAreaFraction = Math.Round(userData[i].CloudAreaFraction - apiData[i].CloudAreaFraction, 1),
                         Humidity = Math.Round(userData[i].Humidity - apiData[i].Humidity, 1),
@@ -122,7 +116,7 @@ namespace LoggingWeatherDataClass
             return comparisonData;
         }
 
-        public static void PrintComparisonData(WeatherDataLog[] comparisonData)
+        public static void PrintComparisonData(WeatherDataLog[] comparisonData, int countryChoice, int cityChoice)
         {
             Console.Clear();
             if (comparisonData == null)
@@ -137,14 +131,8 @@ namespace LoggingWeatherDataClass
                 if (comparisonData[i] != null)
                 {
                     Output.WriteInYellow(Output.Reset($"Comparison for data entry {i + 1}:"), true);
-                    Output.WriteInYellow(Output.Reset("Difference in data (User - API):"), true);
-                    Console.WriteLine();
-                    Console.WriteLine("Temperature: " + comparisonData[i].Temperature + "°C");
-                    Console.WriteLine("Cloud area fraction: " + comparisonData[i].CloudAreaFraction + "%");
-                    Console.WriteLine("Relative humidity: " + comparisonData[i].Humidity + "%");
-                    Console.WriteLine("Wind speed: " + comparisonData[i].WindSpeed + "m/s");
-                    Console.WriteLine("Precipitation amount: " + comparisonData[i].PrecipitationAmount + "mm");
-                    Console.WriteLine();
+                    Output.WriteInYellow(Output.Reset("Difference in data (User - API):"));
+                    PrintWeatherData(null, null, cityChoice, countryChoice, comparisonData);
                 }
                 else
                 {
@@ -195,29 +183,66 @@ namespace LoggingWeatherDataClass
             else
             {
                 Output.WriteInYellow(Output.Reset("Curent Day Weather Report:"), true);
-                Console.WriteLine();
-                Output.WriteInGray(Output.Reset("Weather in: "));
-                Console.WriteLine(coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city + ", " + coordinatesDataClass.CountryCityCoordinates[countryChoice].country);
-                PrintWeatherData(weatherJsonData);
+                PrintWeatherData(weatherJsonData, null, cityChoice, countryChoice);
             }
-            Console.WriteLine();
             Output.WriteInGreen(Output.Reset("Press any key to return"));
             Console.ReadLine();
         }
-        public static void PrintWeatherData(APIWeatherData weatherJsonData)
+        public static void PrintWeatherData(APIWeatherData? weatherJsonData = null, WeatherDataLog? weatherDataLog = null, int cityChoice = 0, int countryChoice = 0, WeatherDataLog[]? comparisonData = null)
         {
-            Output.WriteInGray(Output.Reset("Last updated: "));
-            Console.WriteLine(weatherJsonData?.properties?.meta?.updated_at);
+            string city = "";
+            string time = "";
+            double temperature = 0;
+            double cloudAreaFraction = 0;
+            double precipitationAmount = 0;
+            double humidity = 0;
+            double windSpeed = 0;
+            if (weatherJsonData != null)
+            {
+                city = coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city;
+                time = ConvertTimeFormat(weatherJsonData.properties.meta.updated_at);
+                temperature = weatherJsonData.properties.timeseries[0].data.instant.details.air_temperature;
+                cloudAreaFraction = weatherJsonData.properties.timeseries[0].data.instant.details.cloud_area_fraction;
+                precipitationAmount = weatherJsonData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount;
+                humidity = weatherJsonData.properties.timeseries[0].data.instant.details.relative_humidity;
+                windSpeed = weatherJsonData.properties.timeseries[0].data.instant.details.wind_speed;
+            }
+            else if (weatherDataLog != null)
+            {
+                city = weatherDataLog.City;
+                time = weatherDataLog.Time;
+                temperature = weatherDataLog.Temperature;
+                cloudAreaFraction = weatherDataLog.CloudAreaFraction;
+                precipitationAmount = weatherDataLog.PrecipitationAmount;
+                humidity = weatherDataLog.Humidity;
+                windSpeed = weatherDataLog.WindSpeed;
+            }
+            else if (comparisonData != null)
+            {
+                city = comparisonData[cityChoice].City;
+                time = comparisonData[cityChoice].Time;
+                temperature = comparisonData[cityChoice].Temperature;
+                cloudAreaFraction = comparisonData[cityChoice].CloudAreaFraction;
+                precipitationAmount = comparisonData[cityChoice].PrecipitationAmount;
+                humidity = comparisonData[cityChoice].Humidity;
+                windSpeed = comparisonData[cityChoice].WindSpeed;
+            }
+            Console.WriteLine();
+            Output.WriteInGray(Output.Reset("City: "));
+            Console.WriteLine(city);
+            Output.WriteInGray(Output.Reset("Time: "));
+            Console.WriteLine(time);
             Output.WriteInGray(Output.Reset("Temperature: "));
-            Console.WriteLine(weatherJsonData?.properties?.timeseries?[0].data?.instant?.details?.air_temperature + "°C");
+            Console.WriteLine(temperature + "°C");
             Output.WriteInGray(Output.Reset("Cloud area fraction: "));
-            Console.WriteLine(weatherJsonData?.properties?.timeseries?[0].data?.instant?.details?.cloud_area_fraction + "%");
+            Console.WriteLine(cloudAreaFraction + "%");
             Output.WriteInGray(Output.Reset("Relative humidity: "));
-            Console.WriteLine(weatherJsonData?.properties?.timeseries?[0].data?.instant?.details?.relative_humidity + "%");
+            Console.WriteLine(humidity + "%");
             Output.WriteInGray(Output.Reset("Wind speed: "));
-            Console.WriteLine(weatherJsonData?.properties?.timeseries?[0].data?.instant?.details?.wind_speed + "m/s");
+            Console.WriteLine(windSpeed + "m/s");
             Output.WriteInGray(Output.Reset("Precipitation amount: "));
-            Console.WriteLine(weatherJsonData?.properties?.timeseries?[0].data?.next_1_hours?.details?.precipitation_amount + "mm");
+            Console.WriteLine(precipitationAmount + "mm");
+            Console.WriteLine();
         }
 
         public static WeatherDataLog ProcessWeatherData(string responseBody, int countryChoice, int cityChoice)
@@ -241,6 +266,11 @@ namespace LoggingWeatherDataClass
             HttpResponseMessage response = await client.GetAsync(url);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
+        }
+        public static string ConvertTimeFormat(string inputTime)
+        {
+            DateTime dt = DateTime.Parse(inputTime, null, System.Globalization.DateTimeStyles.RoundtripKind);
+            return dt.ToString("dd/MM/yyyy HH:mm:ss");
         }
     }
 }
