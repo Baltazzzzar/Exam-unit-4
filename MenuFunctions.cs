@@ -15,6 +15,7 @@ namespace Menu
         FunctionMenu,
         ViewLogMenu,
         CompareLogMenu,
+        AverageDeviationMenu
     }
 
     public class MenuScreen
@@ -77,7 +78,7 @@ namespace Menu
             }
             else if (TOC_INDEXES.FunctionMenu == menuIndex)
             {
-                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "Print Weather Log Entries", "Compare Weather Log Data", "Back", "Exit" };
+                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "Print Weather Log Entries", "Compare Weather Log Data", "See Deviation Of API", "Back", "Exit" };
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
@@ -88,6 +89,7 @@ namespace Menu
                             WeatherDataLog.SaveWeatherData(WeatherDataLog.aPIWeatherDetails, filePathAPIData);},
                         ()=>{ SwapMenu(TOC_INDEXES.ViewLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.CompareLogMenu); },
+                        ()=>{ SwapMenu(TOC_INDEXES.AverageDeviationMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.CityMenu); },
                         ()=>{ Console.Clear(); Output.WriteInGreen(Output.Reset("Goodbye!")); Environment.Exit(0);}
                     }
@@ -121,6 +123,20 @@ namespace Menu
                     }
                 };
             }
+            else if (TOC_INDEXES.AverageDeviationMenu == menuIndex)
+            {
+                List<string> itemsDescriptionList = new List<string> { "Last Day", "Last Week", "Last Month", "Back" };
+                output = new Menu()
+                {
+                    itemsDescription = itemsDescriptionList,
+                    itemsAction = new List<Action> {
+                        ()=>{ WeatherDataLog.averageDeviation = WeatherDataLog.CalculateAverageDeviation(filePathUserData,filePathAPIData,1); WeatherDataLog.PrintAverageDeviation(WeatherDataLog.averageDeviation, cityChoice, countryChoice); SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.averageDeviation = WeatherDataLog.CalculateAverageDeviation(filePathUserData,filePathAPIData,7); WeatherDataLog.PrintAverageDeviation(WeatherDataLog.averageDeviation, cityChoice, countryChoice); SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.averageDeviation = WeatherDataLog.CalculateAverageDeviation(filePathUserData,filePathAPIData,30); WeatherDataLog.PrintAverageDeviation(WeatherDataLog.averageDeviation, cityChoice, countryChoice); SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
+                    }
+                };
+            }
             else
             {
                 List<string> itemsDescriptionList = new List<string>();
@@ -129,19 +145,10 @@ namespace Menu
                 {
                     itemsDescriptionList.Add(country.country);
                     int currentCountryIndex = itemsDescriptionList.Count - 1;
-                    itemsActionList.Add(() =>
-                    {
-                        countryChoice = currentCountryIndex;
-                        SwapMenu(TOC_INDEXES.CityMenu);
-                    });
+                    itemsActionList.Add(() => { countryChoice = currentCountryIndex; SwapMenu(TOC_INDEXES.CityMenu); });
                 }
                 itemsDescriptionList.Add("Exit");
-                itemsActionList.Add(() =>
-                {
-                    Console.Clear();
-                    Output.WriteInGreen(Output.Reset("Goodbye!"));
-                    Environment.Exit(0);
-                });
+                itemsActionList.Add(() => { Console.Clear(); Output.WriteInGreen(Output.Reset("Goodbye!")); Environment.Exit(0); });
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,

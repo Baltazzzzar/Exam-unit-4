@@ -20,6 +20,7 @@ namespace LoggingWeatherDataClass
         public static WeatherDataLog? userWeatherDetails = null;
         public static WeatherDataLog? aPIWeatherDetails = null;
         public static WeatherDataLog[]? comparisonData = null;
+        public static WeatherDataLog? averageDeviation = null;
         static readonly HttpClient client = new HttpClient();
 
         public static async Task<string> SendDataRequest(string url)
@@ -226,13 +227,74 @@ namespace LoggingWeatherDataClass
             Output.WriteInGreen(Output.Reset("Press any key to return"));
             Console.ReadLine();
         }
+        public static WeatherDataLog CalculateAverageDeviation(string filePathUserData, string filePathAPIData, int amountOfLogEntries)
+        {
+            if (!File.Exists(filePathUserData) || !File.Exists(filePathAPIData) || new FileInfo(filePathUserData).Length == 0 || new FileInfo(filePathAPIData).Length == 0)
+            {
+                return null;
+            }
+            string jsonUserData = File.ReadAllText(filePathUserData);
+            string jsonAPIData = File.ReadAllText(filePathAPIData);
+            var userData = JsonSerializer.Deserialize<WeatherDataLog[]>(jsonUserData);
+            var apiData = JsonSerializer.Deserialize<WeatherDataLog[]>(jsonAPIData);
+            double totalTemperatureDeviation = 0;
+            double totalCloudAreaFractionDeviation = 0;
+            double totalHumidityDeviation = 0;
+            double totalWindSpeedDeviation = 0;
+            double totalPrecipitationAmountDeviation = 0;
+            int count = 0;
+            for (int i = 0; i < amountOfLogEntries; i++)
+            {
+                if (i < userData?.Length && i < apiData?.Length)
+                {
+                    totalTemperatureDeviation += Math.Abs(userData[i].Temperature - apiData[i].Temperature);
+                    totalCloudAreaFractionDeviation += Math.Abs(userData[i].CloudAreaFraction - apiData[i].CloudAreaFraction);
+                    totalHumidityDeviation += Math.Abs(userData[i].Humidity - apiData[i].Humidity);
+                    totalWindSpeedDeviation += Math.Abs(userData[i].WindSpeed - apiData[i].WindSpeed);
+                    totalPrecipitationAmountDeviation += Math.Abs(userData[i].PrecipitationAmount - apiData[i].PrecipitationAmount);
+                    count++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (count == 0)
+            {
+                return null;
+            }
+            var averageDeviation = new WeatherDataLog
+            {
+                Temperature = Math.Round(totalTemperatureDeviation / count, 1),
+                CloudAreaFraction = Math.Round(totalCloudAreaFractionDeviation / count, 1),
+                Humidity = Math.Round(totalHumidityDeviation / count, 1),
+                WindSpeed = Math.Round(totalWindSpeedDeviation / count, 1),
+                PrecipitationAmount = Math.Round(totalPrecipitationAmountDeviation / count, 1)
+            };
+            return averageDeviation;
+        }
+        public static void PrintAverageDeviation(WeatherDataLog averageDeviation, int cityChoice, int countryChoice)
+        {
+            Console.Clear();
+            if (averageDeviation == null)
+            {
+                Output.WriteInRed(Output.Reset("No data to calculate average deviation"), true);
+                Output.WriteInGreen(Output.Reset("Press any key to return"));
+                Console.ReadLine();
+                return;
+            }
+            Output.WriteInYellow(Output.Reset("Average deviation:"), true);
+            PrintWeatherData(null, null, cityChoice, countryChoice, null, averageDeviation);
+            Output.WriteInGreen(Output.Reset("Press any key to return"));
+            Console.ReadLine();
+        }
 
         public static string ConvertTimeFormat(string inputTime)
         {
             DateTime dt = DateTime.Parse(inputTime, null, System.Globalization.DateTimeStyles.RoundtripKind);
             return dt.ToString("dd/MM/yyyy HH:mm:ss");
         }
-        public static void PrintWeatherData(APIWeatherData? weatherJsonData = null, WeatherDataLog? weatherDataLog = null, int cityChoice = 0, int countryChoice = 0, WeatherDataLog[]? comparisonData = null)
+        public static void PrintWeatherData(APIWeatherData? weatherJsonData = null, WeatherDataLog? weatherDataLog = null, int cityChoice = 0, int countryChoice = 0, WeatherDataLog[]? comparisonData = null, WeatherDataLog? averageDeviation = null)
         {
             string city = "";
             string time = "";
@@ -241,6 +303,7 @@ namespace LoggingWeatherDataClass
             double precipitationAmount = 0;
             double humidity = 0;
             double windSpeed = 0;
+            bool printTime = true;
             if (weatherJsonData != null)
             {
                 city = coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city;
@@ -271,11 +334,24 @@ namespace LoggingWeatherDataClass
                 humidity = comparisonData[cityChoice].Humidity;
                 windSpeed = comparisonData[cityChoice].WindSpeed;
             }
+            else if (averageDeviation != null)
+            {
+                city = coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city;
+                temperature = averageDeviation.Temperature;
+                cloudAreaFraction = averageDeviation.CloudAreaFraction;
+                precipitationAmount = averageDeviation.PrecipitationAmount;
+                humidity = averageDeviation.Humidity;
+                windSpeed = averageDeviation.WindSpeed;
+                printTime = false;
+            }
             Console.WriteLine();
             Output.WriteInGray(Output.Reset("City: "));
             Console.WriteLine(city);
-            Output.WriteInGray(Output.Reset("Time: "));
-            Console.WriteLine(time);
+            if (printTime)
+            {
+                Output.WriteInGray(Output.Reset("Time: "));
+                Console.WriteLine(time);
+            }
             Output.WriteInGray(Output.Reset("Temperature: "));
             Console.WriteLine(temperature + "°C");
             Output.WriteInGray(Output.Reset("Cloud area fraction: "));
