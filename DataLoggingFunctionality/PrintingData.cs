@@ -5,10 +5,10 @@ using Utils;
 
 namespace WeatherDataLogging
 {
-    public class PrintingData
+    public class PrintData
     {
         static CityCoordinates cityCoordinates = new CityCoordinates();
-        public static void PrintWeatherReport(APIWeatherData weatherJsonData, int countryChoice, int cityChoice)
+        public static void PrintWeatherReport(APIWeatherData weatherJsonData, int countryIndex, int cityIndex)
         {
             Console.Clear();
             if (weatherJsonData == null)
@@ -19,7 +19,7 @@ namespace WeatherDataLogging
             else
             {
                 Output.WriteInBlue(Output.Reset("Curent Day Weather Report:"), true);
-                PrintWeatherData(weatherJsonData, null, cityChoice, countryChoice);
+                PrintWeatherData(weatherJsonData, null, cityIndex, countryIndex);
             }
             Output.WriteInGreen(Output.Reset("Press any key to return"));
             Console.ReadLine();
@@ -69,7 +69,7 @@ namespace WeatherDataLogging
             Console.ReadLine();
             Console.Clear();
         }
-        public static void PrintComparisonData(WeatherDataLog[] comparisonData, int countryChoice, int cityChoice)
+        public static void PrintComparisonData(WeatherDataLog[] comparisonData, int countryIndex, int cityIndex)
         {
             Console.Clear();
             if (comparisonData == null)
@@ -85,7 +85,7 @@ namespace WeatherDataLogging
                 {
                     Output.WriteInBlue(Output.Reset($"Comparison for data entry {i + 1}:"), true);
                     Output.WriteInBlue(Output.Reset("Difference in data (User - API):"));
-                    PrintWeatherData(null, null, cityChoice, countryChoice, comparisonData);
+                    PrintWeatherData(null, null, i, 0, comparisonData);
                 }
                 else
                 {
@@ -96,7 +96,7 @@ namespace WeatherDataLogging
             Output.WriteInGreen(Output.Reset("Press any key to return"));
             Console.ReadLine();
         }
-        public static void PrintAverageDeviation(WeatherDataLog averageDeviation, int cityChoice, int countryChoice)
+        public static void PrintAverageDeviation(WeatherDataLog averageDeviation, int cityIndex, int countryIndex)
         {
             Console.Clear();
             if (averageDeviation == null)
@@ -107,11 +107,11 @@ namespace WeatherDataLogging
                 return;
             }
             Output.WriteInBlue(Output.Reset("Average deviation:"), true);
-            PrintWeatherData(null, null, cityChoice, countryChoice, null, averageDeviation);
+            PrintWeatherData(null, null, cityIndex, countryIndex, null, averageDeviation);
             Output.WriteInGreen(Output.Reset("Press any key to return"));
             Console.ReadLine();
         }
-        public static void PrintWeatherData(APIWeatherData? weatherJsonData = null, WeatherDataLog? weatherDataLog = null, int cityChoice = 0, int countryChoice = 0, WeatherDataLog[]? comparisonData = null, WeatherDataLog? averageDeviation = null)
+        public static void PrintWeatherData(APIWeatherData? weatherJsonData = null, WeatherDataLog? weatherDataLog = null, int cityIndex = 0, int countryIndex = 0, WeatherDataLog[]? comparisonData = null, WeatherDataLog? averageDeviation = null)
         {
             string city = "";
             string time = "";
@@ -123,7 +123,7 @@ namespace WeatherDataLogging
             bool printTime = true;
             if (weatherJsonData != null)
             {
-                city = cityCoordinates.CountryCityCoordinates[countryChoice].cities[cityChoice].city;
+                city = cityCoordinates.CountryCityCoordinates[countryIndex].cities[cityIndex].city;
                 time = ProcessData.ConvertTimeFormat(weatherJsonData.properties.meta.updated_at);
                 temperature = weatherJsonData.properties.timeseries[0].data.instant.details.air_temperature;
                 cloudAreaFraction = weatherJsonData.properties.timeseries[0].data.instant.details.cloud_area_fraction;
@@ -133,32 +133,32 @@ namespace WeatherDataLogging
             }
             else if (weatherDataLog != null)
             {
-                city = weatherDataLog.City;
-                time = ProcessData.ConvertTimeFormat(weatherDataLog.Time);
-                temperature = weatherDataLog.Temperature;
-                cloudAreaFraction = weatherDataLog.CloudAreaFraction;
-                precipitationAmount = weatherDataLog.PrecipitationAmount;
-                humidity = weatherDataLog.Humidity;
-                windSpeed = weatherDataLog.WindSpeed;
+                city = weatherDataLog.city;
+                time = ProcessData.ConvertTimeFormat(weatherDataLog.time);
+                temperature = weatherDataLog.temperature;
+                cloudAreaFraction = weatherDataLog.cloudAreaFraction;
+                precipitationAmount = weatherDataLog.precipitationAmount;
+                humidity = weatherDataLog.humidity;
+                windSpeed = weatherDataLog.windSpeed;
             }
             else if (comparisonData != null)
             {
-                city = comparisonData[cityChoice].City;
-                time = comparisonData[cityChoice].Time;
-                temperature = comparisonData[cityChoice].Temperature;
-                cloudAreaFraction = comparisonData[cityChoice].CloudAreaFraction;
-                precipitationAmount = comparisonData[cityChoice].PrecipitationAmount;
-                humidity = comparisonData[cityChoice].Humidity;
-                windSpeed = comparisonData[cityChoice].WindSpeed;
+                city = comparisonData[cityIndex].city;
+                time = comparisonData[cityIndex].time;
+                temperature = comparisonData[cityIndex].temperature;
+                cloudAreaFraction = comparisonData[cityIndex].cloudAreaFraction;
+                precipitationAmount = comparisonData[cityIndex].precipitationAmount;
+                humidity = comparisonData[cityIndex].humidity;
+                windSpeed = comparisonData[cityIndex].windSpeed;
             }
             else if (averageDeviation != null)
             {
-                city = cityCoordinates.CountryCityCoordinates[countryChoice].cities[cityChoice].city;
-                temperature = averageDeviation.Temperature;
-                cloudAreaFraction = averageDeviation.CloudAreaFraction;
-                precipitationAmount = averageDeviation.PrecipitationAmount;
-                humidity = averageDeviation.Humidity;
-                windSpeed = averageDeviation.WindSpeed;
+                city = cityCoordinates.CountryCityCoordinates[countryIndex].cities[cityIndex].city;
+                temperature = averageDeviation.temperature;
+                cloudAreaFraction = averageDeviation.cloudAreaFraction;
+                precipitationAmount = averageDeviation.precipitationAmount;
+                humidity = averageDeviation.humidity;
+                windSpeed = averageDeviation.windSpeed;
                 printTime = false;
             }
             Console.WriteLine();

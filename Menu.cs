@@ -38,17 +38,17 @@ namespace Menu
             {
                 List<string> itemsDescriptionList = new List<string>();
                 List<Action> itemsActionList = new List<Action>();
-                foreach (var city in cityCoordinates.CountryCityCoordinates[WeatherDataLog.countryChoice].cities)
+                foreach (var city in cityCoordinates.CountryCityCoordinates[WeatherDataLog.countryIndex].cities)
                 {
                     itemsDescriptionList.Add(city.city);
                     int currentCityIndex = itemsDescriptionList.Count - 1;
                     itemsActionList.Add(async () =>
                     {
-                        WeatherDataLog.cityChoice = currentCityIndex;
-                        coordinates.latitude = cityCoordinates.GetLatitude(WeatherDataLog.countryChoice, WeatherDataLog.cityChoice);
-                        coordinates.longitude = cityCoordinates.GetLongitude(WeatherDataLog.countryChoice, WeatherDataLog.cityChoice);
-                        WeatherDataLog.filePathAPIData = $"weatherdatalogs/{cityCoordinates.CountryCityCoordinates[WeatherDataLog.countryChoice].cities[WeatherDataLog.cityChoice].city.ToLower()}_apiweatherlog.json";
-                        WeatherDataLog.filePathUserData = $"weatherdatalogs/{cityCoordinates.CountryCityCoordinates[WeatherDataLog.countryChoice].cities[WeatherDataLog.cityChoice].city.ToLower()}_userweatherlog.json";
+                        WeatherDataLog.cityIndex = currentCityIndex;
+                        coordinates.latitude = cityCoordinates.GetLatitude(WeatherDataLog.countryIndex, WeatherDataLog.cityIndex);
+                        coordinates.longitude = cityCoordinates.GetLongitude(WeatherDataLog.countryIndex, WeatherDataLog.cityIndex);
+                        WeatherDataLog.filePathAPIData = $"weatherdatalogs/{cityCoordinates.CountryCityCoordinates[WeatherDataLog.countryIndex].cities[WeatherDataLog.cityIndex].city.ToLower()}_apiweatherlog.json";
+                        WeatherDataLog.filePathUserData = $"weatherdatalogs/{cityCoordinates.CountryCityCoordinates[WeatherDataLog.countryIndex].cities[WeatherDataLog.cityIndex].city.ToLower()}_userweatherlog.json";
                         APIRequestFunctions.url = $"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={coordinates.latitude}&lon={coordinates.longitude}";
                         string responseBody = await APIRequestFunctions.WriteAPIWeatherData(APIRequestFunctions.url);
                         if (responseBody == null)
@@ -57,11 +57,11 @@ namespace Menu
                             return;
                         }
                         APIWeatherData.aPIWeatherData = JsonSerializer.Deserialize<APIWeatherData>(responseBody);
-                        WeatherDataLog.aPIWeatherDetails = ProcessData.ProcessAPIWeatherData(APIWeatherData.aPIWeatherData, WeatherDataLog.countryChoice, WeatherDataLog.cityChoice);
+                        WeatherDataLog.aPIWeatherDetails = ProcessData.ProcessAPIWeatherData(APIWeatherData.aPIWeatherData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex);
                         SwapMenu(TOC_INDEXES.FunctionMenu);
                     });
                 }
-                itemsDescriptionList.Add("Back");
+                itemsDescriptionList.Add(Output.WriteInYellow(Output.Reset("Back")));
                 itemsActionList.Add(() => { SwapMenu(TOC_INDEXES.CountryMenu); });
                 output = new Menu()
                 {
@@ -71,13 +71,13 @@ namespace Menu
             }
             else if (TOC_INDEXES.FunctionMenu == menuIndex)
             {
-                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "Print Weather Log Entries", "Compare Weather Log Data", "See Average Deviation (Accuracy) Of API", "Back", "Exit" };
+                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "Print Weather Log Entries", "Compare Weather Log Data", "See Average Deviation (Accuracy) Of API", Output.WriteInYellow(Output.Reset("Back")), Output.WriteInRed(Output.Reset("Exit")) };
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ PrintingData.PrintWeatherReport(APIWeatherData.aPIWeatherData, WeatherDataLog.countryChoice, WeatherDataLog.cityChoice); },
-                        ()=>{ WeatherDataLog.userWeatherDetails = ProcessData.GetUserWeatherData(cityCoordinates, WeatherDataLog.countryChoice, WeatherDataLog.cityChoice);
+                        ()=>{ PrintData.PrintWeatherReport(APIWeatherData.aPIWeatherData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex); },
+                        ()=>{ WeatherDataLog.userWeatherDetails = ProcessData.GetUserWeatherData(cityCoordinates, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex);
                             ProcessData.SaveWeatherData(WeatherDataLog.userWeatherDetails, WeatherDataLog.filePathUserData);
                             ProcessData.SaveWeatherData(WeatherDataLog.aPIWeatherDetails, WeatherDataLog.filePathAPIData);},
                         ()=>{ SwapMenu(TOC_INDEXES.ViewLogMenu); },
@@ -90,42 +90,42 @@ namespace Menu
             }
             else if (TOC_INDEXES.ViewLogMenu == menuIndex)
             {
-                List<string> itemsDescriptionList = new List<string> { "Last Day", "Last Week", "Last Month", "Back" };
+                List<string> itemsDescriptionList = new List<string> { "Last Day", "Last Week", "Last Month", Output.WriteInYellow(Output.Reset("Back")) };
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ PrintingData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 1); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ PrintingData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 7); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ PrintingData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 30); SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 1); SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 7); SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 30); SwapMenu(TOC_INDEXES.FunctionMenu);},
                         ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
                     }
                 };
             }
             else if (TOC_INDEXES.CompareLogMenu == menuIndex)
             {
-                List<string> itemsDescriptionList = new List<string> { "Last Day", "Last Week", "Last Month", "Back" };
+                List<string> itemsDescriptionList = new List<string> { "Last Day", "Last Week", "Last Month", Output.WriteInYellow(Output.Reset("Back")) };
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 1); PrintingData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryChoice, WeatherDataLog.cityChoice) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 7); PrintingData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryChoice, WeatherDataLog.cityChoice) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 30); PrintingData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryChoice, WeatherDataLog.cityChoice) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 1); PrintData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 7); PrintData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 30); PrintData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
                         ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
                     }
                 };
             }
             else if (TOC_INDEXES.AverageDeviationMenu == menuIndex)
             {
-                List<string> itemsDescriptionList = new List<string> { "Last Day", "Last Week", "Last Month", "Back" };
+                List<string> itemsDescriptionList = new List<string> { "Last Day", "Last Week", "Last Month", Output.WriteInYellow(Output.Reset("Back")) };
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,1); PrintingData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityChoice, WeatherDataLog.countryChoice); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,7); PrintingData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityChoice, WeatherDataLog.countryChoice); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,30); PrintingData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityChoice, WeatherDataLog.countryChoice); SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,1); PrintData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityIndex, WeatherDataLog.countryIndex); SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,7); PrintData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityIndex, WeatherDataLog.countryIndex); SwapMenu(TOC_INDEXES.FunctionMenu);},
+                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,30); PrintData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityIndex, WeatherDataLog.countryIndex); SwapMenu(TOC_INDEXES.FunctionMenu);},
                         ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
                     }
                 };
@@ -138,9 +138,9 @@ namespace Menu
                 {
                     itemsDescriptionList.Add(country.country);
                     int currentCountryIndex = itemsDescriptionList.Count - 1;
-                    itemsActionList.Add(() => { WeatherDataLog.countryChoice = currentCountryIndex; SwapMenu(TOC_INDEXES.CityMenu); });
+                    itemsActionList.Add(() => { WeatherDataLog.countryIndex = currentCountryIndex; SwapMenu(TOC_INDEXES.CityMenu); });
                 }
-                itemsDescriptionList.Add("Exit");
+                itemsDescriptionList.Add(Output.WriteInRed(Output.Reset("Exit")));
                 itemsActionList.Add(() => { Console.Clear(); Output.WriteInGreen(Output.Reset("Goodbye!")); Environment.Exit(0); });
                 output = new Menu()
                 {

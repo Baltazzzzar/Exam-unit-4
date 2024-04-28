@@ -7,14 +7,14 @@ namespace CoordinatesDataClasses
     }
     public class Countries
     {
-        public string country { get; set; }
-        public List<Cities> cities { get; set; }
+        public string? country { get; set; }
+        public List<Cities>? cities { get; set; }
     }
 
     public class Cities
     {
-        public string city { get; set; }
-        public Coordinates Coordinates { get; set; }
+        public string? city { get; set; }
+        public Coordinates? Coordinates { get; set; }
     }
 
     public class CityCoordinates
@@ -29,11 +29,11 @@ namespace CoordinatesDataClasses
                     new Cities { city = "Oslo", Coordinates = new Coordinates { latitude = 59.91, longitude = 10.75 } },
                     new Cities { city = "Bergen", Coordinates = new Coordinates { latitude = 60.39, longitude = 5.32 } },
                     new Cities { city = "Stavanger", Coordinates = new Coordinates { latitude = 58.96, longitude = 5.73 } },
-                    new Cities { city = "Tromsø", Coordinates = new Coordinates { latitude = 69.64, longitude = 18.95 } },
+                    new Cities { city = "Tromsoe", Coordinates = new Coordinates { latitude = 69.64, longitude = 18.95 } },
                     new Cities { city = "Trondheim", Coordinates = new Coordinates { latitude = 63.43, longitude = 10.39 } },
                     new Cities { city = "Grimstad", Coordinates = new Coordinates { latitude = 58.34, longitude = 8.59 } },
                     new Cities { city = "Kristiansand", Coordinates = new Coordinates { latitude = 58.16, longitude = 8.00 } },
-                    new Cities { city = "Bodø", Coordinates = new Coordinates { latitude = 67.28, longitude = 14.40 } }
+                    new Cities { city = "Bodoe", Coordinates = new Coordinates { latitude = 67.28, longitude = 14.40 } }
                 }
             },
             new Countries
@@ -43,8 +43,8 @@ namespace CoordinatesDataClasses
                 {
                     new Cities { city = "Stockholm", Coordinates = new Coordinates { latitude = 59.32, longitude = 18.06 } },
                     new Cities { city = "Gothenburg", Coordinates = new Coordinates { latitude = 57.70, longitude = 11.97 } },
-                    new Cities { city = "Malmö", Coordinates = new Coordinates { latitude = 55.60, longitude = 13.00 } },
-                    new Cities { city = "Luleå", Coordinates = new Coordinates { latitude = 65.58, longitude = 22.15 } }
+                    new Cities { city = "Malmoe", Coordinates = new Coordinates { latitude = 55.60, longitude = 13.00 } },
+                    new Cities { city = "Luleaa", Coordinates = new Coordinates { latitude = 65.58, longitude = 22.15 } }
                 }
             },
             new Countries

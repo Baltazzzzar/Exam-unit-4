@@ -3,7 +3,7 @@ namespace Program
 {
     public class Program
     {
-        public static Task Main()
+        public static void Main()
         {
             MenuScreen menuScreen = new MenuScreen();
             Directory.CreateDirectory("weatherdatalogs");
@@ -12,7 +12,7 @@ namespace Program
                 menuScreen.Input();
                 menuScreen.Update();
                 menuScreen.Draw();
-                Thread.Sleep(50);
+                Thread.Sleep(100);
             }
         }
     }

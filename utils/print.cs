@@ -53,6 +53,10 @@ namespace Utils
         {
             return Write(Color(text, ANSICodes.Colors.Gray), newLine);
         }
+        public static string WriteInYellow(string text, bool newLine = false)
+        {
+            return Write(Color(text, ANSICodes.Colors.Yellow), newLine);
+        }
         public static string Align(string text, Alignment alignment = Alignment.LEFT, bool newLine = false)
         {
             if (text.Split("\n").Length > 1)
