@@ -45,9 +45,9 @@ namespace Utils
         {
             return Write(Color(text, ANSICodes.Colors.Green), newLine);
         }
-        public static string WriteInYellow(string text, bool newLine = false)
+        public static string WriteInBlue(string text, bool newLine = false)
         {
-            return Write(Color(text, ANSICodes.Colors.Yellow), newLine);
+            return Write(Color(text, ANSICodes.Colors.Blue), newLine);
         }
         public static string WriteInGray(string text, bool newLine = false)
         {

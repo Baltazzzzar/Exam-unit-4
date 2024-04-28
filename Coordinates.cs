@@ -17,7 +17,7 @@ namespace CoordinatesDataClasses
         public Coordinates Coordinates { get; set; }
     }
 
-    public class CoordinatesDataClass
+    public class CityCoordinates
     {
         public List<Countries> CountryCityCoordinates = new List<Countries>
         {

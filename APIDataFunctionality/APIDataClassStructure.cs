@@ -1,5 +1,4 @@
-
-namespace APIWeatherDataClasses
+namespace APIData
 
 {
     public class APIWeatherData
@@ -78,6 +77,4 @@ namespace APIWeatherDataClasses
         public double wind_speed { get; set; }
         public double precipitation_amount { get; set; }
     }
-
-
 }
