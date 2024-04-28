@@ -56,31 +56,14 @@ namespace Menu
                         filePathAPIData = $"weatherdatalogs/{coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city.ToLower()}_apiweatherlog.json";
                         filePathUserData = $"weatherdatalogs/{coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city.ToLower()}_userweatherlog.json";
                         url = $"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latitude}&lon={longitude}";
-                        string responseBody = "";
-                        try
+                        string responseBody = await WeatherDataLog.WriteAPIWeatherData(url);
+                        if (responseBody == null)
                         {
-                            responseBody = await WeatherDataLog.FetchWeatherData(url);
-                            File.WriteAllText("weatherdatalogs/apirawweatherdata.json", responseBody);
-                        }
-                        catch (HttpRequestException e)
-                        {
-                            Console.WriteLine("\nException Caught!");
-                            Console.WriteLine("Message :{0} ", e.Message);
-                            Output.Write(Output.Bold(Output.Color($"An error occurred: {e.Message}", ANSICodes.Colors.Red)));
-                            Output.Write(Output.Reset(""));
-                            Console.ReadLine();
+                            SwapMenu(TOC_INDEXES.CountryMenu);
+                            return;
                         }
                         APIWeatherData.aPIWeatherData = JsonSerializer.Deserialize<APIWeatherData>(responseBody);
-                        WeatherDataLog.aPIWeatherDetails = new WeatherDataLog();
-                        {
-                            WeatherDataLog.aPIWeatherDetails.City = coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city;
-                            WeatherDataLog.aPIWeatherDetails.Time = APIWeatherData.aPIWeatherData.properties.meta.updated_at;
-                            WeatherDataLog.aPIWeatherDetails.Temperature = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.instant.details.air_temperature;
-                            WeatherDataLog.aPIWeatherDetails.CloudAreaFraction = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.instant.details.cloud_area_fraction;
-                            WeatherDataLog.aPIWeatherDetails.Humidity = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.instant.details.relative_humidity;
-                            WeatherDataLog.aPIWeatherDetails.WindSpeed = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.instant.details.wind_speed;
-                            WeatherDataLog.aPIWeatherDetails.PrecipitationAmount = APIWeatherData.aPIWeatherData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount;
-                        }
+                        WeatherDataLog.aPIWeatherDetails = WeatherDataLog.ProcessWeatherData(APIWeatherData.aPIWeatherData, countryChoice, cityChoice);
                         SwapMenu(TOC_INDEXES.FunctionMenu);
                     });
                 }

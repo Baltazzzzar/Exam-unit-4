@@ -22,6 +22,74 @@ namespace LoggingWeatherDataClass
         public static WeatherDataLog[]? comparisonData = null;
         static readonly HttpClient client = new HttpClient();
 
+        public static async Task<string> SendDataRequest(string url)
+        {
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Exam-Unit-4 (https://github.com/Baltazzzzar/Exam-Unit-4)");
+            HttpResponseMessage response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
+        public static async Task<string> WriteAPIWeatherData(string url)
+        {
+            try
+            {
+                string responseBody = "";
+                responseBody = await SendDataRequest(url);
+                File.WriteAllText("weatherdatalogs/apirawweatherdata.json", responseBody);
+                return responseBody;
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("Message :{0} ", e.Message);
+                Output.Write(Output.Bold(Output.Color($"An error occurred: {e.Message}", ANSICodes.Colors.Red)));
+                Output.Write(Output.Reset(""));
+                Console.ReadLine();
+                return null;
+            }
+        }
+        public static WeatherDataLog ProcessWeatherData(APIWeatherData aPIWeatherData, int countryChoice, int cityChoice)
+        {
+            return new WeatherDataLog
+            {
+                City = coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city,
+                Time = aPIWeatherData?.properties?.meta?.updated_at,
+                Temperature = aPIWeatherData.properties.timeseries[0].data.instant.details.air_temperature,
+                CloudAreaFraction = aPIWeatherData.properties.timeseries[0].data.instant.details.cloud_area_fraction,
+                Humidity = aPIWeatherData.properties.timeseries[0].data.instant.details.relative_humidity,
+                WindSpeed = aPIWeatherData.properties.timeseries[0].data.instant.details.wind_speed,
+                PrecipitationAmount = aPIWeatherData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount
+            };
+        }
+        public static WeatherDataLog GetUserWeatherData(CoordinatesDataClass coordinatesDataClass, int countryChoice, int cityChoice)
+        {
+            Console.Clear();
+            Output.WriteInGray(Output.Reset("Enter the temperature (°C): "));
+            double temperature = double.Parse(Console.ReadLine());
+            Console.Clear();
+            Output.WriteInGray(Output.Reset("Enter the cloud area fraction (%): "));
+            double cloudAreaFraction = double.Parse(Console.ReadLine());
+            Console.Clear();
+            Output.WriteInGray(Output.Reset("Enter the precipitation amount (mm): "));
+            double precipitationAmount = double.Parse(Console.ReadLine());
+            Console.Clear();
+            Output.WriteInGray(Output.Reset("Enter the relative humidity (%): "));
+            double relativeHumidity = double.Parse(Console.ReadLine());
+            Console.Clear();
+            Output.WriteInGray(Output.Reset("Enter the wind speed (m/s): "));
+            double windSpeed = double.Parse(Console.ReadLine());
+            Console.Clear();
+            return new WeatherDataLog
+            {
+                City = coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city,
+                Time = DateTime.Now.ToString(),
+                Temperature = temperature,
+                CloudAreaFraction = cloudAreaFraction,
+                PrecipitationAmount = precipitationAmount,
+                Humidity = relativeHumidity,
+                WindSpeed = windSpeed
+            };
+        }
         public static void SaveWeatherData(WeatherDataLog weatherLogEntry, string filePath)
         {
             List<WeatherDataLog>? allDetails = new List<WeatherDataLog>();
@@ -33,6 +101,22 @@ namespace LoggingWeatherDataClass
             allDetails?.Add(weatherLogEntry);
             string newJsonEntries = JsonSerializer.Serialize(allDetails);
             File.WriteAllText(filePath, newJsonEntries);
+        }
+        public static void PrintWeatherReport(APIWeatherData weatherJsonData, int countryChoice, int cityChoice)
+        {
+            Console.Clear();
+            if (weatherJsonData == null)
+            {
+                Output.WriteInRed(Output.Reset("Invalid data"));
+                return;
+            }
+            else
+            {
+                Output.WriteInYellow(Output.Reset("Curent Day Weather Report:"), true);
+                PrintWeatherData(weatherJsonData, null, cityChoice, countryChoice);
+            }
+            Output.WriteInGreen(Output.Reset("Press any key to return"));
+            Console.ReadLine();
         }
         public static void PrintWeatherDataLog(string filePathUserData, string filePathAPIData, int amountOfLogEntries)
         {
@@ -115,7 +199,6 @@ namespace LoggingWeatherDataClass
             }
             return comparisonData;
         }
-
         public static void PrintComparisonData(WeatherDataLog[] comparisonData, int countryChoice, int cityChoice)
         {
             Console.Clear();
@@ -143,50 +226,11 @@ namespace LoggingWeatherDataClass
             Output.WriteInGreen(Output.Reset("Press any key to return"));
             Console.ReadLine();
         }
-        public static WeatherDataLog GetUserWeatherData(CoordinatesDataClass coordinatesDataClass, int countryChoice, int cityChoice)
+
+        public static string ConvertTimeFormat(string inputTime)
         {
-            Console.Clear();
-            Output.WriteInGray(Output.Reset("Enter the temperature (°C): "));
-            double temperature = double.Parse(Console.ReadLine());
-            Console.Clear();
-            Output.WriteInGray(Output.Reset("Enter the cloud area fraction (%): "));
-            double cloudAreaFraction = double.Parse(Console.ReadLine());
-            Console.Clear();
-            Output.WriteInGray(Output.Reset("Enter the precipitation amount (mm): "));
-            double precipitationAmount = double.Parse(Console.ReadLine());
-            Console.Clear();
-            Output.WriteInGray(Output.Reset("Enter the relative humidity (%): "));
-            double relativeHumidity = double.Parse(Console.ReadLine());
-            Console.Clear();
-            Output.WriteInGray(Output.Reset("Enter the wind speed (m/s): "));
-            double windSpeed = double.Parse(Console.ReadLine());
-            Console.Clear();
-            return new WeatherDataLog
-            {
-                City = coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city,
-                Time = DateTime.Now.ToString(),
-                Temperature = temperature,
-                CloudAreaFraction = cloudAreaFraction,
-                PrecipitationAmount = precipitationAmount,
-                Humidity = relativeHumidity,
-                WindSpeed = windSpeed
-            };
-        }
-        public static void PrintWeatherReport(APIWeatherData weatherJsonData, int countryChoice, int cityChoice)
-        {
-            Console.Clear();
-            if (weatherJsonData == null)
-            {
-                Output.WriteInRed(Output.Reset("Invalid data"));
-                return;
-            }
-            else
-            {
-                Output.WriteInYellow(Output.Reset("Curent Day Weather Report:"), true);
-                PrintWeatherData(weatherJsonData, null, cityChoice, countryChoice);
-            }
-            Output.WriteInGreen(Output.Reset("Press any key to return"));
-            Console.ReadLine();
+            DateTime dt = DateTime.Parse(inputTime, null, System.Globalization.DateTimeStyles.RoundtripKind);
+            return dt.ToString("dd/MM/yyyy HH:mm:ss");
         }
         public static void PrintWeatherData(APIWeatherData? weatherJsonData = null, WeatherDataLog? weatherDataLog = null, int cityChoice = 0, int countryChoice = 0, WeatherDataLog[]? comparisonData = null)
         {
@@ -210,7 +254,7 @@ namespace LoggingWeatherDataClass
             else if (weatherDataLog != null)
             {
                 city = weatherDataLog.City;
-                time = weatherDataLog.Time;
+                time = ConvertTimeFormat(weatherDataLog.Time);
                 temperature = weatherDataLog.Temperature;
                 cloudAreaFraction = weatherDataLog.CloudAreaFraction;
                 precipitationAmount = weatherDataLog.PrecipitationAmount;
@@ -243,34 +287,6 @@ namespace LoggingWeatherDataClass
             Output.WriteInGray(Output.Reset("Precipitation amount: "));
             Console.WriteLine(precipitationAmount + "mm");
             Console.WriteLine();
-        }
-
-        public static WeatherDataLog ProcessWeatherData(string responseBody, int countryChoice, int cityChoice)
-        {
-            APIWeatherData? weatherJsonData = JsonSerializer.Deserialize<APIWeatherData>(responseBody);
-            WeatherDataLog aPIWeatherDetails = new WeatherDataLog
-            {
-                City = coordinatesDataClass.CountryCityCoordinates[countryChoice].cities[cityChoice].city,
-                Time = weatherJsonData?.properties?.meta?.updated_at,
-                Temperature = weatherJsonData.properties.timeseries[0].data.instant.details.air_temperature,
-                CloudAreaFraction = weatherJsonData.properties.timeseries[0].data.instant.details.cloud_area_fraction,
-                Humidity = weatherJsonData.properties.timeseries[0].data.instant.details.relative_humidity,
-                WindSpeed = weatherJsonData.properties.timeseries[0].data.instant.details.wind_speed,
-                PrecipitationAmount = weatherJsonData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount
-            };
-            return aPIWeatherDetails;
-        }
-        public static async Task<string> FetchWeatherData(string url)
-        {
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("Exam-Unit-4 (https://github.com/Baltazzzzar/Exam-Unit-4)");
-            HttpResponseMessage response = await client.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
-        }
-        public static string ConvertTimeFormat(string inputTime)
-        {
-            DateTime dt = DateTime.Parse(inputTime, null, System.Globalization.DateTimeStyles.RoundtripKind);
-            return dt.ToString("dd/MM/yyyy HH:mm:ss");
         }
     }
 }
