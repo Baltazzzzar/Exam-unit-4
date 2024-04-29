@@ -27,6 +27,9 @@ namespace Menu
         TOC_INDEXES currentTOC = TOC_INDEXES.CountryMenu;
         int selectedItemInMenu;
         int menuChange = 0;
+        int viewLogMenuIndex = 2;
+        int compareLogMenuIndex = 3;
+        int averageDeviationMenuIndex = 4;
         static CityCoordinates cityCoordinates = new CityCoordinates();
         static Coordinates coordinates = new Coordinates();
         public MenuScreen()
@@ -100,7 +103,7 @@ namespace Menu
                         ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,11);},
                         ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,23);},
                         ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,47);},
-                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 0); },
+                        ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
                     }
                 };
             }
@@ -111,12 +114,12 @@ namespace Menu
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 1); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 2);},
-                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 7); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 2);},
-                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 30); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 2);},
-                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of days worth of entries: ") ; PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, choice); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 2);},
-                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of entries: ") ; PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, choice, false); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 2);},
-                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 2); },
+                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 1); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, viewLogMenuIndex);},
+                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 7); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, viewLogMenuIndex);},
+                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 30); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, viewLogMenuIndex);},
+                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of days worth of entries: ") ; PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, choice); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, viewLogMenuIndex);},
+                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of entries: ") ; PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, choice, false); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, viewLogMenuIndex);},
+                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, viewLogMenuIndex); },
                     }
                 };
             }
@@ -127,12 +130,12 @@ namespace Menu
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ HelpingFunctions.ProcessAndPrintComparisonData(1) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 3);},
-                        ()=>{ HelpingFunctions.ProcessAndPrintComparisonData(7) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 3);},
-                        ()=>{ HelpingFunctions.ProcessAndPrintComparisonData(30) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 3);},
-                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of days worth of entries: ") ; HelpingFunctions.ProcessAndPrintComparisonData(choice) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 3);},
-                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of entries: ") ; HelpingFunctions.ProcessAndPrintComparisonData(choice, false) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 3);},
-                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 3); },
+                        ()=>{ HelpingFunctions.ProcessAndPrintComparisonData(1) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, compareLogMenuIndex);},
+                        ()=>{ HelpingFunctions.ProcessAndPrintComparisonData(7) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, compareLogMenuIndex);},
+                        ()=>{ HelpingFunctions.ProcessAndPrintComparisonData(30) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, compareLogMenuIndex);},
+                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of days worth of entries: ") ; HelpingFunctions.ProcessAndPrintComparisonData(choice) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, compareLogMenuIndex);},
+                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of entries: ") ; HelpingFunctions.ProcessAndPrintComparisonData(choice, false) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, compareLogMenuIndex);},
+                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, compareLogMenuIndex); },
                     }
                 };
             }
@@ -143,12 +146,12 @@ namespace Menu
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ HelpingFunctions.CalculateAndPrintAverageDeviation(1); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 4);},
-                        ()=>{ HelpingFunctions.CalculateAndPrintAverageDeviation(7); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 4);},
-                        ()=>{ HelpingFunctions.CalculateAndPrintAverageDeviation(30); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 4);},
-                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of days worth of entries: ") ; HelpingFunctions.CalculateAndPrintAverageDeviation(choice); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 4);},
-                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of entries: ") ; HelpingFunctions.CalculateAndPrintAverageDeviation(choice, false); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 4);},
-                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 4); },
+                        ()=>{ HelpingFunctions.CalculateAndPrintAverageDeviation(1); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, averageDeviationMenuIndex);},
+                        ()=>{ HelpingFunctions.CalculateAndPrintAverageDeviation(7); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, averageDeviationMenuIndex);},
+                        ()=>{ HelpingFunctions.CalculateAndPrintAverageDeviation(30); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, averageDeviationMenuIndex);},
+                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of days worth of entries: ") ; HelpingFunctions.CalculateAndPrintAverageDeviation(choice); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, averageDeviationMenuIndex);},
+                        ()=>{ int choice = HelpingFunctions.GetValidInt("Choose the amount of entries: ") ; HelpingFunctions.CalculateAndPrintAverageDeviation(choice, false); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, averageDeviationMenuIndex);},
+                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, averageDeviationMenuIndex); },
                     }
                 };
             }
