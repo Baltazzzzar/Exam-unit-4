@@ -13,6 +13,7 @@ namespace Menu
         CountryMenu,
         CityMenu,
         FunctionMenu,
+        ForecastMenu,
         ViewLogMenu,
         CompareLogMenu,
         AverageDeviationMenu
@@ -57,7 +58,7 @@ namespace Menu
                             return;
                         }
                         APIWeatherData.aPIWeatherData = JsonSerializer.Deserialize<APIWeatherData>(responseBody);
-                        WeatherDataLog.aPIWeatherDetails = ProcessData.ProcessAPIWeatherData(APIWeatherData.aPIWeatherData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex);
+                        WeatherDataLog.aPIPresentWeatherDetails = ProcessData.ProcessAPIWeatherData(APIWeatherData.aPIWeatherData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex);
                         SwapMenu(TOC_INDEXES.FunctionMenu);
                     });
                 }
@@ -71,20 +72,36 @@ namespace Menu
             }
             else if (TOC_INDEXES.FunctionMenu == menuIndex)
             {
-                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "View Weather Log Entries", "Compare Weather Log Data", "See Average Deviation (Accuracy) Of API", Output.WriteInYellow(Output.Reset("Back")), Output.WriteInRed(Output.Reset("Exit")) };
+                List<string> itemsDescriptionList = new List<string> { "View Weather Forecast", "Save A Weather Data Log Entry", "View Weather Log Entries", "Compare Weather Log Data", "See Average Deviation (Accuracy) Of API", Output.WriteInYellow(Output.Reset("Back")), Output.WriteInRed(Output.Reset("Exit")) };
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ PrintData.PrintWeatherReport(APIWeatherData.aPIWeatherData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex); },
+                        ()=>{ SwapMenu(TOC_INDEXES.ForecastMenu); },
                         ()=>{ WeatherDataLog.userWeatherDetails = ProcessData.GetUserWeatherData(cityCoordinates, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex);
                             ProcessData.SaveWeatherData(WeatherDataLog.userWeatherDetails, WeatherDataLog.filePathUserData);
-                            ProcessData.SaveWeatherData(WeatherDataLog.aPIWeatherDetails, WeatherDataLog.filePathAPIData);},
+                            ProcessData.SaveWeatherData(WeatherDataLog.aPIPresentWeatherDetails, WeatherDataLog.filePathAPIData);},
                         ()=>{ SwapMenu(TOC_INDEXES.ViewLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.CompareLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.AverageDeviationMenu); },
                         ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.CityMenu, cityCoordinates.CountryCityCoordinates[WeatherDataLog.countryIndex].cities.Count); },
                         ()=>{ Console.Clear(); Output.WriteInGreen(Output.Reset("Goodbye!")); Environment.Exit(0);}
+                    }
+                };
+            }
+            else if (TOC_INDEXES.ForecastMenu == menuIndex)
+            {
+                List<string> itemsDescriptionList = new List<string> { "Last gathered forecast", "Forecast in 6 hours", "Forecast in 12 hours", "Forecast Tomorrow", "Forecast in 2 days", Output.WriteInYellow(Output.Reset("Back")) };
+                output = new Menu()
+                {
+                    itemsDescription = itemsDescriptionList,
+                    itemsAction = new List<Action> {
+                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,0);},
+                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,5);},
+                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,11);},
+                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,23);},
+                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,47);},
+                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 0); },
                     }
                 };
             }

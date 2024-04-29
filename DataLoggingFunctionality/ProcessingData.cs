@@ -2,6 +2,8 @@ using System.Text.Json;
 using CoordinatesDataClasses;
 using APIData;
 using Utils;
+using System.Runtime.InteropServices.Marshalling;
+using System.Globalization;
 
 namespace WeatherDataLogging
 {
@@ -11,15 +13,17 @@ namespace WeatherDataLogging
         static WeatherDataLog weatherLogEntry = new WeatherDataLog();
         public static WeatherDataLog ProcessAPIWeatherData(APIWeatherData aPIWeatherData, int countryIndex, int cityIndex)
         {
+            string convertedAPITime = ConvertTimeFormat(aPIWeatherData.properties.timeseries[0].time);
+            int forecastAccuracyAdjustment = Convert.ToInt32(GetHourDifference(convertedAPITime, DateTime.Now.ToString()));
             return new WeatherDataLog
             {
                 city = cityCoordinates?.CountryCityCoordinates?[countryIndex].cities?[cityIndex].city,
-                time = aPIWeatherData?.properties?.meta?.updated_at,
-                temperature = aPIWeatherData.properties.timeseries[0].data.instant.details.air_temperature,
-                cloudAreaFraction = aPIWeatherData.properties.timeseries[0].data.instant.details.cloud_area_fraction,
-                humidity = aPIWeatherData.properties.timeseries[0].data.instant.details.relative_humidity,
-                windSpeed = aPIWeatherData.properties.timeseries[0].data.instant.details.wind_speed,
-                precipitationAmount = aPIWeatherData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount
+                time = aPIWeatherData.properties.timeseries[forecastAccuracyAdjustment].time,
+                temperature = aPIWeatherData.properties.timeseries[forecastAccuracyAdjustment].data.instant.details.air_temperature,
+                cloudAreaFraction = aPIWeatherData.properties.timeseries[forecastAccuracyAdjustment].data.instant.details.cloud_area_fraction,
+                humidity = aPIWeatherData.properties.timeseries[forecastAccuracyAdjustment].data.instant.details.relative_humidity,
+                windSpeed = aPIWeatherData.properties.timeseries[forecastAccuracyAdjustment].data.instant.details.wind_speed,
+                precipitationAmount = aPIWeatherData.properties.timeseries[forecastAccuracyAdjustment].data.next_1_hours.details.precipitation_amount
             };
         }
         public static WeatherDataLog GetUserWeatherData(CityCoordinates cityCoordinates, int countryIndex, int cityIndex)
@@ -117,6 +121,12 @@ namespace WeatherDataLogging
         {
             DateTime dt = DateTime.Parse(inputTime, null, System.Globalization.DateTimeStyles.RoundtripKind);
             return dt.ToString("dd/MM/yyyy HH:mm:ss");
+        }
+        public static double GetHourDifference(string time1, string time2)
+        {
+            DateTime dt1 = DateTime.Parse(time1);
+            DateTime dt2 = DateTime.Parse(time2);
+            return Math.Abs((dt1 - dt2).TotalHours);
         }
         public static double GetValidDouble(string prompt)
         {
