@@ -10,7 +10,6 @@ namespace HelperFunctions
 {
     public class HelpingFunctions
     {
-        Coordinates coordinatesData = new Coordinates();
         public static string ConvertTimeFormat(string inputTime)
         {
             DateTime dt = DateTime.Parse(inputTime, null, System.Globalization.DateTimeStyles.RoundtripKind);

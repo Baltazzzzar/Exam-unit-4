@@ -99,10 +99,10 @@ namespace Menu
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
                         ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,0);},
-                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,5);},
-                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,11);},
-                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,23);},
-                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,47);},
+                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,6);},
+                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,12);},
+                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,24);},
+                        ()=>{ PrintData.PrintWeatherForecast(APIWeatherData.aPIWeatherData,WeatherDataLog.countryIndex,WeatherDataLog.cityIndex,48);},
                         ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
                     }
                 };
