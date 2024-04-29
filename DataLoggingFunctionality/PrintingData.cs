@@ -170,6 +170,7 @@ namespace WeatherDataLogging
                 windSpeed = averageDeviation.windSpeed;
                 printTime = false;
             }
+            Console.WriteLine();
             Output.WriteInGray(Output.Reset("City: "));
             Console.WriteLine(city);
             if (printTime)

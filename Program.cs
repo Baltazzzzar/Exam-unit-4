@@ -1,4 +1,5 @@
 ﻿using Menu;
+
 namespace Program
 {
     public class Program
@@ -12,7 +13,7 @@ namespace Program
                 menuScreen.Input();
                 menuScreen.Update();
                 menuScreen.Draw();
-                Thread.Sleep(100);
+                Thread.Sleep(75);
             }
         }
     }

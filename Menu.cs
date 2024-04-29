@@ -58,7 +58,6 @@ namespace Menu
                             return;
                         }
                         APIWeatherData.aPIWeatherData = JsonSerializer.Deserialize<APIWeatherData>(responseBody);
-                        WeatherDataLog.aPIPresentWeatherDetails = ProcessData.ProcessAPIWeatherData(APIWeatherData.aPIWeatherData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex);
                         SwapMenu(TOC_INDEXES.FunctionMenu);
                     });
                 }
@@ -79,8 +78,9 @@ namespace Menu
                     itemsAction = new List<Action> {
                         ()=>{ SwapMenu(TOC_INDEXES.ForecastMenu); },
                         ()=>{ WeatherDataLog.userWeatherDetails = ProcessData.GetUserWeatherData(cityCoordinates, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex);
+                            WeatherDataLog.aPIWeatherDetails = ProcessData.ProcessAPIWeatherData(APIWeatherData.aPIWeatherData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex, WeatherDataLog.userWeatherDetails.hourAdjustment);
                             ProcessData.SaveWeatherData(WeatherDataLog.userWeatherDetails, WeatherDataLog.filePathUserData);
-                            ProcessData.SaveWeatherData(WeatherDataLog.aPIPresentWeatherDetails, WeatherDataLog.filePathAPIData);},
+                            ProcessData.SaveWeatherData(WeatherDataLog.aPIWeatherDetails, WeatherDataLog.filePathAPIData);},
                         ()=>{ SwapMenu(TOC_INDEXES.ViewLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.CompareLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.AverageDeviationMenu); },
