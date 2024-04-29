@@ -25,30 +25,15 @@ namespace WeatherDataLogging
         public static WeatherDataLog GetUserWeatherData(CityCoordinates cityCoordinates, int countryIndex, int cityIndex)
         {
             Console.Clear();
-            Output.WriteInGray(Output.Reset("Enter the temperature (°C): "));
-            double temperature = double.Parse(Console.ReadLine());
-            Console.Clear();
-            Output.WriteInGray(Output.Reset("Enter the cloud area fraction (%): "));
-            double cloudAreaFraction = double.Parse(Console.ReadLine());
-            Console.Clear();
-            Output.WriteInGray(Output.Reset("Enter the relative humidity (%): "));
-            double relativeHumidity = double.Parse(Console.ReadLine());
-            Console.Clear();
-            Output.WriteInGray(Output.Reset("Enter the wind speed (m/s): "));
-            double windSpeed = double.Parse(Console.ReadLine());
-            Console.Clear();
-            Output.WriteInGray(Output.Reset("Enter the precipitation amount (mm): "));
-            double precipitationAmount = double.Parse(Console.ReadLine());
-            Console.Clear();
             return new WeatherDataLog
             {
                 city = cityCoordinates?.CountryCityCoordinates?[countryIndex].cities?[cityIndex].city,
                 time = DateTime.Now.ToString(),
-                temperature = temperature,
-                cloudAreaFraction = cloudAreaFraction,
-                precipitationAmount = precipitationAmount,
-                humidity = relativeHumidity,
-                windSpeed = windSpeed
+                temperature = GetValidDouble("Enter the temperature (°C): "),
+                cloudAreaFraction = GetValidDouble("Enter the cloud area fraction (%): "),
+                precipitationAmount = GetValidDouble("Enter the precipitation amount (mm): "),
+                humidity = GetValidDouble("Enter the humidity (%): "),
+                windSpeed = GetValidDouble("Enter the wind speed (m/s): ")
             };
         }
         public static void SaveWeatherData(WeatherDataLog weatherLogEntry, string filePath)
@@ -63,7 +48,7 @@ namespace WeatherDataLogging
             string newJsonEntries = JsonSerializer.Serialize(allDetails);
             File.WriteAllText(filePath, newJsonEntries);
         }
-        public static WeatherDataLog[] CompareData(string filePathUserData, string filePathAPIData, int amountOfLogEntries)
+        public static WeatherDataLog[] CompareData(string filePathUserData, string filePathAPIData)
         {
             if (!File.Exists(filePathUserData) || !File.Exists(filePathAPIData) || new FileInfo(filePathUserData).Length == 0 || new FileInfo(filePathAPIData).Length == 0)
             {
@@ -73,27 +58,22 @@ namespace WeatherDataLogging
             string jsonAPIData = File.ReadAllText(filePathAPIData);
             var userData = JsonSerializer.Deserialize<WeatherDataLog[]>(jsonUserData);
             var apiData = JsonSerializer.Deserialize<WeatherDataLog[]>(jsonAPIData);
+
             var comparisonData = new List<WeatherDataLog>();
-            for (int i = 0; i < amountOfLogEntries; i++)
+            for (int i = 0; i < Math.Min(userData.Length, apiData.Length); i++)
             {
-                if (i < userData?.Length && i < apiData?.Length)
+                int reverseIndex = userData.Length - 1 - i;
+                string convertedAPITime = ConvertTimeFormat(apiData[reverseIndex].time);
+                comparisonData.Add(new WeatherDataLog
                 {
-                    string convertedAPITime = ConvertTimeFormat(apiData[i].time);
-                    comparisonData.Add(new WeatherDataLog
-                    {
-                        city = userData[i].city,
-                        time = $"User: {userData[i].time}  | API: {convertedAPITime}",
-                        temperature = Math.Round(userData[i].temperature - apiData[i].temperature, 1),
-                        cloudAreaFraction = Math.Round(userData[i].cloudAreaFraction - apiData[i].cloudAreaFraction, 1),
-                        humidity = Math.Round(userData[i].humidity - apiData[i].humidity, 1),
-                        windSpeed = Math.Round(userData[i].windSpeed - apiData[i].windSpeed, 1),
-                        precipitationAmount = Math.Round(userData[i].precipitationAmount - apiData[i].precipitationAmount, 1)
-                    });
-                }
-                else
-                {
-                    break;
-                }
+                    city = userData[reverseIndex].city,
+                    time = $"User: {userData[reverseIndex].time}  | API: {convertedAPITime}",
+                    temperature = Math.Round(userData[reverseIndex].temperature - apiData[reverseIndex].temperature, 1),
+                    cloudAreaFraction = Math.Round(userData[reverseIndex].cloudAreaFraction - apiData[reverseIndex].cloudAreaFraction, 1),
+                    humidity = Math.Round(userData[reverseIndex].humidity - apiData[reverseIndex].humidity, 1),
+                    windSpeed = Math.Round(userData[reverseIndex].windSpeed - apiData[reverseIndex].windSpeed, 1),
+                    precipitationAmount = Math.Round(userData[reverseIndex].precipitationAmount - apiData[reverseIndex].precipitationAmount, 1)
+                });
             }
             return comparisonData.ToArray();
         }
@@ -112,24 +92,17 @@ namespace WeatherDataLogging
             double totalHumidityDeviation = 0;
             double totalWindSpeedDeviation = 0;
             double totalPrecipitationAmountDeviation = 0;
+            if (amountOfLogEntries > userData.Length || amountOfLogEntries > apiData.Length)
+            {
+                amountOfLogEntries = Math.Min(userData.Length, apiData.Length);
+            }
             for (int i = 0; i < amountOfLogEntries; i++)
             {
-                if (i < userData?.Length && i < apiData?.Length)
-                {
-                    totalTemperatureDeviation += Math.Abs(userData[i].temperature - apiData[i].temperature);
-                    totalCloudAreaFractionDeviation += Math.Abs(userData[i].cloudAreaFraction - apiData[i].cloudAreaFraction);
-                    totalHumidityDeviation += Math.Abs(userData[i].humidity - apiData[i].humidity);
-                    totalWindSpeedDeviation += Math.Abs(userData[i].windSpeed - apiData[i].windSpeed);
-                    totalPrecipitationAmountDeviation += Math.Abs(userData[i].precipitationAmount - apiData[i].precipitationAmount);
-                }
-                else
-                {
-                    break;
-                }
-            }
-            if (amountOfLogEntries == 0)
-            {
-                return null;
+                totalTemperatureDeviation += Math.Abs(userData[i].temperature - apiData[i].temperature);
+                totalCloudAreaFractionDeviation += Math.Abs(userData[i].cloudAreaFraction - apiData[i].cloudAreaFraction);
+                totalHumidityDeviation += Math.Abs(userData[i].humidity - apiData[i].humidity);
+                totalWindSpeedDeviation += Math.Abs(userData[i].windSpeed - apiData[i].windSpeed);
+                totalPrecipitationAmountDeviation += Math.Abs(userData[i].precipitationAmount - apiData[i].precipitationAmount);
             }
             return new WeatherDataLog
             {
@@ -144,6 +117,21 @@ namespace WeatherDataLogging
         {
             DateTime dt = DateTime.Parse(inputTime, null, System.Globalization.DateTimeStyles.RoundtripKind);
             return dt.ToString("dd/MM/yyyy HH:mm:ss");
+        }
+        public static double GetValidDouble(string prompt)
+        {
+            double result;
+            Output.WriteInGray(Output.Reset(prompt));
+            while (!double.TryParse(Console.ReadLine(), out result))
+            {
+                Console.Clear();
+                Output.WriteInRed(Output.Reset("Invalid input. Please enter a valid number: "));
+                Thread.Sleep(2000);
+                Console.Clear();
+                Output.WriteInGray(Output.Reset(prompt));
+            }
+            Console.Clear();
+            return result;
         }
     }
 }

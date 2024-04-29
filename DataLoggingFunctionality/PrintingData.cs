@@ -21,7 +21,7 @@ namespace WeatherDataLogging
                 Output.WriteInBlue(Output.Reset("Curent Day Weather Report:"), true);
                 PrintWeatherData(weatherJsonData, null, cityIndex, countryIndex);
             }
-            Output.WriteInGreen(Output.Reset("Press any key to return"));
+            Output.WriteInGreen(Output.Reset("Press any key to return"), true);
             Console.ReadLine();
         }
         public static void PrintWeatherDataLog(string filePathUserData, string filePathAPIData, int amountOfLogEntries)
@@ -65,21 +65,26 @@ namespace WeatherDataLogging
             {
                 Output.WriteInRed(Output.Reset("No logged data available"), true);
             }
-            Output.WriteInGreen(Output.Reset("Press any key to return"));
+            Output.WriteInGreen(Output.Reset("Press any key to return"), true);
             Console.ReadLine();
             Console.Clear();
         }
-        public static void PrintComparisonData(WeatherDataLog[] comparisonData, int countryIndex, int cityIndex)
+        public static void PrintComparisonData(WeatherDataLog[] comparisonData, int countryIndex, int cityIndex, int amountofLogEntries)
         {
             Console.Clear();
             if (comparisonData == null)
             {
                 Output.WriteInRed(Output.Reset("No data to compare"), true);
-                Output.WriteInGreen(Output.Reset("Press any key to return"));
+                Output.WriteInGreen(Output.Reset("Press any key to return"), true);
                 Console.ReadLine();
                 return;
             }
-            for (int i = 0; i < comparisonData.Length; i++)
+            int count = amountofLogEntries;
+            if (comparisonData.Length < count)
+            {
+                count = comparisonData.Length;
+            }
+            for (int i = 0; i < count; i++)
             {
                 if (comparisonData[i] != null)
                 {
@@ -87,13 +92,12 @@ namespace WeatherDataLogging
                     Output.WriteInBlue(Output.Reset("Difference in data (User - API):"));
                     PrintWeatherData(null, null, i, 0, comparisonData);
                 }
-                else
-                {
-                    Output.WriteInRed(Output.Reset($"No more data to compare for entry {i + 1}."), true);
-                    break;
-                }
             }
-            Output.WriteInGreen(Output.Reset("Press any key to return"));
+            if (count != amountofLogEntries)
+            {
+                Output.WriteInRed(Output.Reset($"No more data to compare for entry {count + 1}"), true);
+            }
+            Output.WriteInGreen(Output.Reset("Press any key to return"), true);
             Console.ReadLine();
         }
         public static void PrintAverageDeviation(WeatherDataLog averageDeviation, int cityIndex, int countryIndex)
@@ -102,13 +106,13 @@ namespace WeatherDataLogging
             if (averageDeviation == null)
             {
                 Output.WriteInRed(Output.Reset("No data to calculate average deviation"), true);
-                Output.WriteInGreen(Output.Reset("Press any key to return"));
+                Output.WriteInGreen(Output.Reset("Press any key to return"), true);
                 Console.ReadLine();
                 return;
             }
             Output.WriteInBlue(Output.Reset("Average deviation:"), true);
             PrintWeatherData(null, null, cityIndex, countryIndex, null, averageDeviation);
-            Output.WriteInGreen(Output.Reset("Press any key to return"));
+            Output.WriteInGreen(Output.Reset("Press any key to return"), true);
             Console.ReadLine();
         }
         public static void PrintWeatherData(APIWeatherData? weatherJsonData = null, WeatherDataLog? weatherDataLog = null, int cityIndex = 0, int countryIndex = 0, WeatherDataLog[]? comparisonData = null, WeatherDataLog? averageDeviation = null)

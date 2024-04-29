@@ -62,7 +62,7 @@ namespace Menu
                     });
                 }
                 itemsDescriptionList.Add(Output.WriteInYellow(Output.Reset("Back")));
-                itemsActionList.Add(() => { SwapMenu(TOC_INDEXES.CountryMenu); });
+                itemsActionList.Add(() => { SwapMenuWithSetIndex(TOC_INDEXES.CountryMenu, WeatherDataLog.countryIndex); });
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
@@ -71,7 +71,7 @@ namespace Menu
             }
             else if (TOC_INDEXES.FunctionMenu == menuIndex)
             {
-                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "Print Weather Log Entries", "Compare Weather Log Data", "See Average Deviation (Accuracy) Of API", Output.WriteInYellow(Output.Reset("Back")), Output.WriteInRed(Output.Reset("Exit")) };
+                List<string> itemsDescriptionList = new List<string> { "View Current Day Weather Data", "Save A Weather Data Log Entry", "View Weather Log Entries", "Compare Weather Log Data", "See Average Deviation (Accuracy) Of API", Output.WriteInYellow(Output.Reset("Back")), Output.WriteInRed(Output.Reset("Exit")) };
                 output = new Menu()
                 {
                     itemsDescription = itemsDescriptionList,
@@ -83,7 +83,7 @@ namespace Menu
                         ()=>{ SwapMenu(TOC_INDEXES.ViewLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.CompareLogMenu); },
                         ()=>{ SwapMenu(TOC_INDEXES.AverageDeviationMenu); },
-                        ()=>{ SwapMenu(TOC_INDEXES.CityMenu); },
+                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.CityMenu, cityCoordinates.CountryCityCoordinates[WeatherDataLog.countryIndex].cities.Count); },
                         ()=>{ Console.Clear(); Output.WriteInGreen(Output.Reset("Goodbye!")); Environment.Exit(0);}
                     }
                 };
@@ -95,10 +95,10 @@ namespace Menu
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 1); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 7); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 30); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
+                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 1); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 2);},
+                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 7); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 2);},
+                        ()=>{ PrintData.PrintWeatherDataLog(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 30); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 2);},
+                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 2); },
                     }
                 };
             }
@@ -109,10 +109,10 @@ namespace Menu
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 1); PrintData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 7); PrintData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData, 30); PrintData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex) ; SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
+                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData); PrintData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex, 1) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 3);},
+                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData); PrintData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex, 7) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 3);},
+                        ()=>{ WeatherDataLog.comparisonData = ProcessData.CompareData(WeatherDataLog.filePathUserData, WeatherDataLog.filePathAPIData); PrintData.PrintComparisonData(WeatherDataLog.comparisonData, WeatherDataLog.countryIndex, WeatherDataLog.cityIndex, 30) ; SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 3);},
+                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 3); },
                     }
                 };
             }
@@ -123,10 +123,10 @@ namespace Menu
                 {
                     itemsDescription = itemsDescriptionList,
                     itemsAction = new List<Action> {
-                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,1); PrintData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityIndex, WeatherDataLog.countryIndex); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,7); PrintData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityIndex, WeatherDataLog.countryIndex); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,30); PrintData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityIndex, WeatherDataLog.countryIndex); SwapMenu(TOC_INDEXES.FunctionMenu);},
-                        ()=>{ SwapMenu(TOC_INDEXES.FunctionMenu); },
+                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,1); PrintData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityIndex, WeatherDataLog.countryIndex); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 4);},
+                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,7); PrintData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityIndex, WeatherDataLog.countryIndex); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 4);},
+                        ()=>{ WeatherDataLog.averageDeviation = ProcessData.CalculateAverageDeviation(WeatherDataLog.filePathUserData,WeatherDataLog.filePathAPIData,30); PrintData.PrintAverageDeviation(WeatherDataLog.averageDeviation, WeatherDataLog.cityIndex, WeatherDataLog.countryIndex); SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 4);},
+                        ()=>{ SwapMenuWithSetIndex(TOC_INDEXES.FunctionMenu, 4); },
                     }
                 };
             }
@@ -154,6 +154,11 @@ namespace Menu
         {
             currentMenu = GetMenuForMenuIndex(newMenuIndex);
             selectedItemInMenu = 0;
+        }
+        void SwapMenuWithSetIndex(TOC_INDEXES newMenuIndex, int index)
+        {
+            currentMenu = GetMenuForMenuIndex(newMenuIndex);
+            selectedItemInMenu = index;
         }
 
         void OnMenuAction(int item)
