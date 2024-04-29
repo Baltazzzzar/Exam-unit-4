@@ -1,7 +1,7 @@
 using System.Text.Json;
 using CoordinatesDataClasses;
 using APIData;
-using Utils;
+using HelperFunctions;
 
 namespace WeatherDataLogging
 {
@@ -11,8 +11,8 @@ namespace WeatherDataLogging
         public static WeatherDataLog ProcessAPIWeatherData(APIWeatherData aPIWeatherData, int countryIndex, int cityIndex, int manualHourAdjustment = 0)
         {
             int forecastAccuracyAdjustment;
-            string convertedAPITime = ConvertTimeFormat(aPIWeatherData.properties.timeseries[0].time);
-            forecastAccuracyAdjustment = Convert.ToInt32(GetHourDifference(convertedAPITime, DateTime.Now.ToString()));
+            string convertedAPITime = HelpingFunctions.ConvertTimeFormat(aPIWeatherData.properties.timeseries[0].time);
+            forecastAccuracyAdjustment = Convert.ToInt32(HelpingFunctions.GetHourDifference(convertedAPITime, DateTime.Now.ToString()));
             if (manualHourAdjustment > 0)
             {
                 forecastAccuracyAdjustment = forecastAccuracyAdjustment - manualHourAdjustment;
@@ -35,16 +35,16 @@ namespace WeatherDataLogging
         public static WeatherDataLog GetUserWeatherData(CityCoordinates cityCoordinates, int countryIndex, int cityIndex)
         {
             Console.Clear();
-            int hoursAgo = Convert.ToInt32(GetValidDouble("How many hours ago was the weather data recorded? "));
+            int hoursAgo = HelpingFunctions.GetValidInt("How many hours ago was the weather data recorded? ");
             return new WeatherDataLog
             {
                 city = cityCoordinates?.CountryCityCoordinates?[countryIndex].cities?[cityIndex].city,
                 time = DateTime.Now.AddHours(-hoursAgo).ToString(),
-                temperature = GetValidDouble("Enter the temperature (°C): "),
-                cloudAreaFraction = GetValidDouble("Enter the cloud area fraction (%): "),
-                precipitationAmount = GetValidDouble("Enter the precipitation amount (mm): "),
-                humidity = GetValidDouble("Enter the humidity (%): "),
-                windSpeed = GetValidDouble("Enter the wind speed (m/s): "),
+                temperature = HelpingFunctions.GetValidDouble("Enter the temperature (°C): "),
+                cloudAreaFraction = HelpingFunctions.GetValidDouble("Enter the cloud area fraction (%): "),
+                precipitationAmount = HelpingFunctions.GetValidDouble("Enter the precipitation amount (mm): "),
+                humidity = HelpingFunctions.GetValidDouble("Enter the humidity (%): "),
+                windSpeed = HelpingFunctions.GetValidDouble("Enter the wind speed (m/s): "),
                 hourAdjustment = hoursAgo
             };
         }
@@ -75,7 +75,7 @@ namespace WeatherDataLogging
             for (int i = 0; i < Math.Min(userData.Length, apiData.Length); i++)
             {
                 int reverseIndex = userData.Length - 1 - i;
-                string convertedAPITime = ConvertTimeFormat(apiData[reverseIndex].time);
+                string convertedAPITime = HelpingFunctions.ConvertTimeFormat(apiData[reverseIndex].time);
                 comparisonData.Add(new WeatherDataLog
                 {
                     city = userData[reverseIndex].city,
@@ -125,31 +125,6 @@ namespace WeatherDataLogging
                 precipitationAmount = Math.Round(totalPrecipitationAmountDeviation / amountOfLogEntries, 2)
             };
         }
-        public static string ConvertTimeFormat(string inputTime)
-        {
-            DateTime dt = DateTime.Parse(inputTime, null, System.Globalization.DateTimeStyles.RoundtripKind);
-            return dt.ToString("dd/MM/yyyy HH:mm:ss");
-        }
-        public static double GetHourDifference(string time1, string time2)
-        {
-            DateTime dt1 = DateTime.Parse(time1);
-            DateTime dt2 = DateTime.Parse(time2);
-            return Math.Abs((dt1 - dt2).TotalHours);
-        }
-        public static double GetValidDouble(string prompt)
-        {
-            double result;
-            Output.WriteInGray(Output.Reset(prompt));
-            while (!double.TryParse(Console.ReadLine(), out result))
-            {
-                Console.Clear();
-                Output.WriteInRed(Output.Reset("Invalid input. Please enter a valid number: "));
-                Thread.Sleep(2000);
-                Console.Clear();
-                Output.WriteInGray(Output.Reset(prompt));
-            }
-            Console.Clear();
-            return result;
-        }
+
     }
 }

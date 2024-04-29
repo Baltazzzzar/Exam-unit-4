@@ -2,6 +2,7 @@ using System.Text.Json;
 using CoordinatesDataClasses;
 using APIData;
 using Utils;
+using HelperFunctions;
 
 namespace WeatherDataLogging
 {
@@ -10,8 +11,8 @@ namespace WeatherDataLogging
         static CityCoordinates cityCoordinates = new CityCoordinates();
         public static void PrintWeatherForecast(APIWeatherData weatherJsonData, int countryIndex, int cityIndex, int forecastHour)
         {
-            string convertedAPITime = ProcessData.ConvertTimeFormat(weatherJsonData.properties.timeseries[0].time);
-            int forecastAccuracyAdjustment = Convert.ToInt32(ProcessData.GetHourDifference(convertedAPITime, DateTime.Now.ToString()));
+            string convertedAPITime = HelpingFunctions.ConvertTimeFormat(weatherJsonData.properties.timeseries[0].time);
+            int forecastAccuracyAdjustment = Convert.ToInt32(HelpingFunctions.GetHourDifference(convertedAPITime, DateTime.Now.ToString()));
             int adjustedForecastHour = forecastHour + forecastAccuracyAdjustment;
             Console.Clear();
             if (weatherJsonData == null)
@@ -27,9 +28,13 @@ namespace WeatherDataLogging
             Output.WriteInGreen(Output.Reset("Press any key to return"), true);
             Console.ReadLine();
         }
-        public static void PrintWeatherDataLog(string filePathUserData, string filePathAPIData, int amountOfLogEntries)
+        public static void PrintWeatherDataLog(string filePathUserData, string filePathAPIData, int amountOfLogEntries, bool entriesAreInDays = true)
         {
             Console.Clear();
+            if (entriesAreInDays)
+            {
+                amountOfLogEntries = HelpingFunctions.FindAmountOfLogEntries(amountOfLogEntries, filePathUserData);
+            }
             if (File.Exists(filePathUserData) && new FileInfo(filePathUserData).Length > 0 && File.Exists(filePathAPIData) && new FileInfo(filePathAPIData).Length > 0)
             {
                 string jsonUserData = File.ReadAllText(filePathUserData);
@@ -133,7 +138,7 @@ namespace WeatherDataLogging
             if (weatherJsonData != null)
             {
                 city = cityCoordinates.CountryCityCoordinates[countryIndex].cities[cityIndex].city;
-                time = ProcessData.ConvertTimeFormat(weatherJsonData.properties.timeseries[forecastHour].time);
+                time = HelpingFunctions.ConvertTimeFormat(weatherJsonData.properties.timeseries[forecastHour].time);
                 temperature = weatherJsonData.properties.timeseries[forecastHour].data.instant.details.air_temperature;
                 cloudAreaFraction = weatherJsonData.properties.timeseries[forecastHour].data.instant.details.cloud_area_fraction;
                 precipitationAmount = weatherJsonData.properties.timeseries[forecastHour].data.next_1_hours.details.precipitation_amount;
@@ -143,7 +148,7 @@ namespace WeatherDataLogging
             else if (weatherDataLog != null)
             {
                 city = weatherDataLog.city;
-                time = ProcessData.ConvertTimeFormat(weatherDataLog.time);
+                time = HelpingFunctions.ConvertTimeFormat(weatherDataLog.time);
                 temperature = weatherDataLog.temperature;
                 cloudAreaFraction = weatherDataLog.cloudAreaFraction;
                 precipitationAmount = weatherDataLog.precipitationAmount;
